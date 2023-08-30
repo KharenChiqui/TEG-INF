@@ -36,12 +36,17 @@ typedef struct Funcionalidad {
   struct Funcionalidad *next_func_conc;
   unsigned long exec_time;
 }Funcionalidades;
+
+typedef struct Memoria_Instrucciones{
+  int pos;
+  Memoria_Instrucciones *next_func;
+}Memoria_Instrucciones;
 /*----------------------*/
 
 /*------VARIABLES GLOBALES------*/
 int count = 0;
 Funcionalidad **funcionalidades = NULL;
-Funcionalidad *memoria = NULL;
+Memoria_Instrucciones *memoria = NULL;
 bool sonido = false;
 bool comenzar_programa = false;
 bool finalizar_programa = false;
@@ -49,45 +54,27 @@ int volver_a_comenzar = 0;
 bool ejecutar_programa = false;
 /*-------------------------------*/
 
-void imprimir_lista(){
 
-  Serial.println("LISTA----------------------");
-  if(memoria != NULL){
-    Funcionalidad* current = memoria;
-
-    while(current != NULL){
-      Serial.println(current->UID);
-      current = current->next_func;
-
-    }
-
-  }
-  Serial.println("--------------------------");
-}
 
 /*--------------------------------------------FUNCIONALIDADES---------------------------------------*/
 
-void almacenar_en_memoria(Funcionalidad *func){
-  Funcionalidad *nuevo_elemento = NULL;
+void almacenar_en_memoria(int posicion){
+  Memoria_Instrucciones *nuevo_elemento = NULL;
 
-	if ((nuevo_elemento = (Funcionalidad *) malloc(sizeof (Funcionalidad))) == NULL){
+	if ((nuevo_elemento = (Memoria_Instrucciones *) malloc(sizeof (Memoria_Instrucciones))) == NULL){
 		Serial.println("nuevaFunc: error en el malloc\n");
 		exit(1);
   }
 
-  nuevo_elemento ->UID = func->UID;
-  nuevo_elemento ->Ptr_func = func ->Ptr_func;
-  nuevo_elemento ->type = func ->type;
-  nuevo_elemento ->next_func = func->next_func;
-  nuevo_elemento -> next_func_conc = func->next_func_conc;
-  nuevo_elemento -> exec_time = func->exec_time;
+  nuevo_elemento-> pos = posicion;
+  nuevo_elemento->next_func = NULL;
 
   //PRIMER ELEMENTO
   if(memoria == NULL){
     memoria = nuevo_elemento;
   }
     else {
-      Funcionalidad *Ptr_aux = memoria;
+      Memoria_Instrucciones *Ptr_aux = memoria;
 
       while(Ptr_aux->next_func != NULL){
         Ptr_aux = Ptr_aux->next_func;
@@ -196,7 +183,7 @@ void encontrar_funcionalidad_tarjeta(char* UID){
           sonido = true;
         }
       }*/
-      almacenar_en_memoria(funcionalidades[i]);
+      almacenar_en_memoria(i);
       return;  
     }
   }
@@ -244,9 +231,9 @@ void pausar_sonido(char *UID){
 
 void limpiar_memoria(){
 
-  Funcionalidad *Ptr_aux = NULL;
+  Memoria_Instrucciones *Ptr_aux = NULL;
 
-  for(Funcionalidad *Ptr = memoria; Ptr != NULL;  ){
+  for(Memoria_Instrucciones *Ptr = memoria; Ptr != NULL;  ){
     Ptr_aux = Ptr->next_func;
     free(Ptr);
     Ptr = Ptr_aux;
@@ -257,7 +244,7 @@ void limpiar_memoria(){
 int tamano_memoria(){
   int tam = 0;
   
-  for(Funcionalidad *Ptr_aux = memoria; Ptr_aux != NULL; Ptr_aux = Ptr_aux->next_func ){
+  for(Memoria_Instrucciones *Ptr_aux = memoria; Ptr_aux != NULL; Ptr_aux = Ptr_aux->next_func ){
     tam++;
   }
 return tam;}
@@ -271,39 +258,6 @@ return tam;}
     println("Hey");
   }
 }*/
-
-void ejecutar_funcionalidades(){
-  
-  void (*P)() = NULL;
-  
-  for(Funcionalidad *Ptr_aux = memoria; Ptr_aux != NULL; Ptr_aux = Ptr_aux->next_func ){
-    bool flag = true;
-    unsigned long tiempo_inicio = millis();
-
-    if (!strcmp(Ptr_aux->UID,"A3 7A CB 94")){ //Si es emitir sonido
-      bool sonido = false;
-    }
-
-    while(flag){
-      Serial.println("SE EJECUTA FUNCION");
-
-      if (!strcmp(Ptr_aux->UID,"A3 7A CB 94")){
-
-        if(!sonido){
-          sonido = true;
-
-        }
-      }
-      if(millis() - tiempo_inicio >= (Ptr_aux -> exec_time)){
-        Serial.println("SE HA CUMPLIDO EL TIEMPO MAXIMO");
-        flag = false;
-      }
-    }
-    Serial.println("A por ellos");
-    P = Ptr_aux ->Ptr_func;
-    P();
-  }
-}
 
 
 
@@ -381,9 +335,9 @@ void loop(void) {
   
      do{
 
-        imprimir_lista(); //cambiar por un llamado a cada funcionalidad en secuencia
-        Serial.println("A ejecutar funcionalidades");
-        ejecutar_funcionalidades();
+        //imprimir_lista(); //cambiar por un llamado a cada funcionalidad en secuencia
+        //Serial.println("A ejecutar funcionalidades");
+        //ejecutar_funcionalidades();
         volver_a_comenzar--;
 
       } while(volver_a_comenzar > 0);   
