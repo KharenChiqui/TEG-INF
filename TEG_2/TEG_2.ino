@@ -68,7 +68,8 @@ void almacenar_en_memoria(int posicion){
 
   nuevo_elemento-> pos = posicion;
   nuevo_elemento->next_func = NULL;
-
+  Serial.print("POS ALMACENADA: ");
+  Serial.println(nuevo_elemento->pos);
   //PRIMER ELEMENTO
   if(memoria == NULL){
     memoria = nuevo_elemento;
@@ -174,15 +175,7 @@ void encontrar_funcionalidad_tarjeta(char* UID){
   bool flag = false;
 
   for(int i = 0; i < 35; i++ ){
-    //Serial.println(i,1);
     if(! strcmp(UID,funcionalidades[i]-> UID)){
-      /*if(funcionalidades[i]->type == 7){
-        Serial.println("ES UNA FUNCIONALIDAD DE SONIDO");
-        if(!sonido){
-          Serial.println("Sonido desactvivado");
-          sonido = true;
-        }
-      }*/
       almacenar_en_memoria(i);
       return;  
     }
@@ -249,17 +242,17 @@ int tamano_memoria(){
   }
 return tam;}
 
-/*void leer_tarjetas(){
-  Serial.println("HOLA");
-  
-  time_t endwait = time(NULL) + 5;
+void imprimir_lista(){
 
-  while(time(NULL) < endwait){
-    println("Hey");
+  Serial.println("IMPRIMIENDO");
+
+  for(Memoria_Instrucciones *Ptr_aux = memoria; Ptr_aux != NULL; Ptr_aux = Ptr_aux->next_func ){
+    Serial.print("Posicion ");
+    Serial.print(Ptr_aux->pos,1);
+    Serial.println();
+    Serial.println(funcionalidades[Ptr_aux->pos]->UID);
   }
-}*/
-
-
+}
 
 /*--FUNCIONES QUE SE EJECUTAN UNA SOLA VEZ--*/
 void setup(void) {
@@ -290,7 +283,7 @@ void loop(void) {
       ptrUID = new char[TagUID.length() + 1];
       strcpy(ptrUID, TagUID.c_str());
 
-      if(!strcmp(ptrUID, "A3 CE 89 94") || !strcmp(ptrUID, "43 26 C4 12") || !strcmp(ptrUID, "E3 F3 F0 94") ||  !strcmp(ptrUID, "E3 FC B3 12")){
+      if(!strcmp(ptrUID, "A3 CE 89 94") || !strcmp(ptrUID, "43 26 C4 12") || !strcmp(ptrUID, "E3 F3 F0 94") ||  !strcmp(ptrUID, "E3 FC B3 12")){ //Condicional de mas
         if(!strcmp(ptrUID, "A3 CE 89 94")){
           if(!comenzar_programa){
             comenzar_programa = true;
@@ -335,7 +328,7 @@ void loop(void) {
   
      do{
 
-        //imprimir_lista(); //cambiar por un llamado a cada funcionalidad en secuencia
+        imprimir_lista(); //cambiar por un llamado a cada funcionalidad en secuencia
         //Serial.println("A ejecutar funcionalidades");
         //ejecutar_funcionalidades();
         volver_a_comenzar--;
