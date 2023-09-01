@@ -37,16 +37,16 @@ typedef struct Funcionalidad {
   unsigned long exec_time;
 }Funcionalidades;
 
-typedef struct Memoria_Instrucciones{
+typedef struct Instrucciones{
   int pos;
-  Memoria_Instrucciones *next_func;
-}Memoria_Instrucciones;
+  Instrucciones *next_func;
+}Instrucciones;
 /*----------------------*/
 
 /*------VARIABLES GLOBALES------*/
 int count = 0;
 Funcionalidad **funcionalidades = NULL;
-Memoria_Instrucciones *memoria = NULL;
+Instrucciones *memoria = NULL;
 bool sonido = false;
 bool comenzar_programa = false;
 bool finalizar_programa = false;
@@ -58,10 +58,11 @@ bool ejecutar_programa = false;
 
 /*--------------------------------------------FUNCIONALIDADES---------------------------------------*/
 
-void almacenar_en_memoria(int posicion){
-  Memoria_Instrucciones *nuevo_elemento = NULL;
+Instrucciones *crear_nueva_instruccion(int posicion){
+  
+  Instrucciones *nuevo_elemento = NULL;
 
-	if ((nuevo_elemento = (Memoria_Instrucciones *) malloc(sizeof (Memoria_Instrucciones))) == NULL){
+	if ((nuevo_elemento = (Instrucciones *) malloc(sizeof (Instrucciones))) == NULL){
 		Serial.println("nuevaFunc: error en el malloc\n");
 		exit(1);
   }
@@ -70,12 +71,18 @@ void almacenar_en_memoria(int posicion){
   nuevo_elemento->next_func = NULL;
   Serial.print("POS ALMACENADA: ");
   Serial.println(nuevo_elemento->pos);
+
+return nuevo_elemento;
+}
+
+void almacenar_en_memoria(int posicion){
+  Instrucciones *nuevo_elemento = crear_nueva_instruccion(posicion);
   //PRIMER ELEMENTO
   if(memoria == NULL){
     memoria = nuevo_elemento;
   }
     else {
-      Memoria_Instrucciones *Ptr_aux = memoria;
+      Instrucciones *Ptr_aux = memoria;
 
       while(Ptr_aux->next_func != NULL){
         Ptr_aux = Ptr_aux->next_func;
@@ -134,26 +141,26 @@ void crear_arreglo_funcionalidades(){
   funcionalidades[4] = crear_nueva_funcionalidad("A3 3E 72 94", &prueba, 0, NULL, NULL,0); //BORRAR
   funcionalidades[5] = crear_nueva_funcionalidad("E3 FC B3 12", &prueba, 2, NULL, NULL,0); //EJECUTAR PROGRAMA
   funcionalidades[6] = crear_nueva_funcionalidad("93 02 86 94", &prueba, 2, NULL, NULL,0); //PAUSAR
-  funcionalidades[7] = crear_nueva_funcionalidad("53 12 73 94", &prueba, 3, NULL, NULL,0); //MOVER CABEZA A LA IZQUIERDA
-  funcionalidades[8] = crear_nueva_funcionalidad("F3 94 8B 94", &prueba, 3, NULL, NULL,0); //MOVER CABEZA A LA DERECHA
-  funcionalidades[9] = crear_nueva_funcionalidad("33 22 B7 94", &prueba, 3, NULL, NULL,0); //AGITAR COLA
-  funcionalidades[10] = crear_nueva_funcionalidad("83 0E AA 12", &prueba, 4, NULL, NULL,0); //AVANZAR
-  funcionalidades[11] = crear_nueva_funcionalidad("13 45 8A 94", &prueba, 4, NULL, NULL,0); //GIRAR A LA DERECHA
-  funcionalidades[12] = crear_nueva_funcionalidad("D3 DF 81 94", &prueba, 4, NULL, NULL,0); //GIRAR SOBRE SI MISMO
-  funcionalidades[13] = crear_nueva_funcionalidad("B3 23 8F 94", &prueba, 4, NULL, NULL,0); //VOLVER POR LA DERECHA
-  funcionalidades[14] = crear_nueva_funcionalidad("13 63 6B 94", &prueba, 4, NULL, NULL,0); //RETROCEDER
-  funcionalidades[15] = crear_nueva_funcionalidad("83 11 6B 94", &prueba, 4, NULL, NULL,0); //GIRAR A LA IZQUIERDA
-  funcionalidades[16] = crear_nueva_funcionalidad("33 09 BB 94", &prueba, 4, NULL, NULL,0); //EVITAR OBSTACULOS
-  funcionalidades[17] = crear_nueva_funcionalidad("93 E2 20 95", &prueba, 4, NULL, NULL,0); //VOLVER POR LA IZQUIERDA
-  funcionalidades[18] = crear_nueva_funcionalidad("23 DE 6C 94", &prueba, 5, NULL, NULL,0); //ENCENDER LUCES
-  funcionalidades[19] = crear_nueva_funcionalidad("13 7C 72 94", &prueba, 5, NULL, NULL,0); //APAGAR LUCES
-  funcionalidades[20] = crear_nueva_funcionalidad("F3 A9 89 94", &prueba, 6, NULL, NULL,0); //ABRIR OJOS
-  funcionalidades[21] = crear_nueva_funcionalidad("93 D3 80 94", &prueba, 6, NULL, NULL,0); //CERRAR OJOS
-  funcionalidades[22] = crear_nueva_funcionalidad("63 36 C6 94", &prueba, 6, NULL, NULL,0); //PESTANEAR
-  funcionalidades[23] = crear_nueva_funcionalidad("D3 12 74 94", &prueba, 7, NULL, NULL,0); //GRABAR AUDIO
-  funcionalidades[24] = crear_nueva_funcionalidad("53 2D 89 94", &prueba,7, NULL, NULL,0); //REPRODUCIR AUDIO
+  funcionalidades[7] = crear_nueva_funcionalidad("53 12 73 94", &prueba, 3, NULL, NULL,5000); //MOVER CABEZA A LA IZQUIERDA
+  funcionalidades[8] = crear_nueva_funcionalidad("F3 94 8B 94", &prueba, 3, NULL, NULL,5000); //MOVER CABEZA A LA DERECHA
+  funcionalidades[9] = crear_nueva_funcionalidad("33 22 B7 94", &prueba, 3, NULL, NULL,5000); //AGITAR COLA
+  funcionalidades[10] = crear_nueva_funcionalidad("83 0E AA 12", &prueba, 4, NULL, NULL,5000); //AVANZAR
+  funcionalidades[11] = crear_nueva_funcionalidad("13 45 8A 94", &prueba, 4, NULL, NULL,5000); //GIRAR A LA DERECHA
+  funcionalidades[12] = crear_nueva_funcionalidad("D3 DF 81 94", &prueba, 4, NULL, NULL,5000); //GIRAR SOBRE SI MISMO
+  funcionalidades[13] = crear_nueva_funcionalidad("B3 23 8F 94", &prueba, 4, NULL, NULL,5000); //VOLVER POR LA DERECHA
+  funcionalidades[14] = crear_nueva_funcionalidad("13 63 6B 94", &prueba, 4, NULL, NULL,5000); //RETROCEDER
+  funcionalidades[15] = crear_nueva_funcionalidad("83 11 6B 94", &prueba, 4, NULL, NULL,5000); //GIRAR A LA IZQUIERDA
+  funcionalidades[16] = crear_nueva_funcionalidad("33 09 BB 94", &prueba, 4, NULL, NULL,5000); //EVITAR OBSTACULOS
+  funcionalidades[17] = crear_nueva_funcionalidad("93 E2 20 95", &prueba, 4, NULL, NULL,5000); //VOLVER POR LA IZQUIERDA
+  funcionalidades[18] = crear_nueva_funcionalidad("23 DE 6C 94", &prueba, 5, NULL, NULL,5000); //ENCENDER LUCES
+  funcionalidades[19] = crear_nueva_funcionalidad("13 7C 72 94", &prueba, 5, NULL, NULL,5000); //APAGAR LUCES
+  funcionalidades[20] = crear_nueva_funcionalidad("F3 A9 89 94", &prueba, 6, NULL, NULL,5000); //ABRIR OJOS
+  funcionalidades[21] = crear_nueva_funcionalidad("93 D3 80 94", &prueba, 6, NULL, NULL,5000); //CERRAR OJOS
+  funcionalidades[22] = crear_nueva_funcionalidad("63 36 C6 94", &prueba, 6, NULL, NULL,5000); //PESTANEAR
+  funcionalidades[23] = crear_nueva_funcionalidad("D3 12 74 94", &prueba, 7, NULL, NULL,5000); //GRABAR AUDIO
+  funcionalidades[24] = crear_nueva_funcionalidad("53 2D 89 94", &prueba,7, NULL, NULL,5000); //REPRODUCIR AUDIO
   funcionalidades[25] = crear_nueva_funcionalidad("A3 7A CB 94", &emitir_sonido, 7, NULL, NULL,15000); //EMITIR SONIDO
-  funcionalidades[26] = crear_nueva_funcionalidad("E3 F7 A7 12", &pausar_sonido, 7, NULL, NULL,0); //SILENCIAR
+  funcionalidades[26] = crear_nueva_funcionalidad("E3 F7 A7 12", &pausar_sonido, 7, NULL, NULL,5000); //SILENCIAR
 
   /*-----------------------COLORES--------------------*/
   /*funcionalidades[27] = nuevaFuncionalidad("", &prueba);
@@ -211,22 +218,23 @@ void inicializar_sonido(){
 
 void emitir_sonido(){
   Serial.println("Entro para play");
-  MP3.start(); 
+  //Serial.println();
+  /*MP3.start(); 
   delay(10000);
-  MP3.pause();
+  MP3.pause();*/
 }
 
 void pausar_sonido(char *UID){
   Serial.println("Entro para pausar");
-  MP3.pause();
-  delay(100);
+  /*MP3.pause();
+  delay(100);*/
 }
 
 void limpiar_memoria(){
 
-  Memoria_Instrucciones *Ptr_aux = NULL;
+  Instrucciones *Ptr_aux = NULL;
 
-  for(Memoria_Instrucciones *Ptr = memoria; Ptr != NULL;  ){
+  for(Instrucciones *Ptr = memoria; Ptr != NULL;  ){
     Ptr_aux = Ptr->next_func;
     free(Ptr);
     Ptr = Ptr_aux;
@@ -237,7 +245,7 @@ void limpiar_memoria(){
 int tamano_memoria(){
   int tam = 0;
   
-  for(Memoria_Instrucciones *Ptr_aux = memoria; Ptr_aux != NULL; Ptr_aux = Ptr_aux->next_func ){
+  for(Instrucciones *Ptr_aux = memoria; Ptr_aux != NULL; Ptr_aux = Ptr_aux->next_func ){
     tam++;
   }
 return tam;}
@@ -246,13 +254,62 @@ void imprimir_lista(){
 
   Serial.println("IMPRIMIENDO");
 
-  for(Memoria_Instrucciones *Ptr_aux = memoria; Ptr_aux != NULL; Ptr_aux = Ptr_aux->next_func ){
+  for(Instrucciones *Ptr_aux = memoria; Ptr_aux != NULL; Ptr_aux = Ptr_aux->next_func ){
     Serial.print("Posicion ");
     Serial.print(Ptr_aux->pos,1);
     Serial.println();
     Serial.println(funcionalidades[Ptr_aux->pos]->UID);
   }
 }
+
+Funcionalidad *ordenar_bloque_instrucciones(int pos_inicial, int pos_final, int nro_tarjetas){
+
+  //Memoria_Instrucciones *Bloque_ins
+
+  for (int i = 0; i <= nro_tarjetas; i++){
+    //VE PREGUNTANDO EN ESE BLOQUE DE INSTRUCCIONES EL TIPO DE CAJA UNA Y LO ALMACENAS EN MATRIZ DE CONCURRECIA
+  }
+}
+
+
+void ejecutar_instrucciones_programa(){
+
+  int pos_inicial = 0, pos_final = 0, i = 0, nro_tarjetas = 0;
+
+  for(Instrucciones *Ptr_aux = memoria; Ptr_aux != NULL; Ptr_aux = Ptr_aux->next_func ){
+    nro_tarjetas++;
+
+    Serial.print("INDICE ");
+    Serial.println(i,1);
+
+    Serial.print("POS INICIAL ");
+    Serial.println(pos_inicial,1);
+
+    if(!strcmp(funcionalidades[Ptr_aux ->pos]->UID, "B3 54 7A 12" )){
+
+      Serial.print("POS FINAL");
+      pos_final = i - 1;
+      Serial.println(pos_final,1);
+      
+      //llamar a ordenamiento
+      
+      Serial.print("POS INICIAL ");
+      pos_inicial = i + 1;
+      Serial.println(pos_inicial,1);
+
+      
+      Serial.print("NRO. TARJETAS");
+      Serial.println(nro_tarjetas-1,1);
+      nro_tarjetas = 0;
+    }
+
+  i++;
+  
+
+  }
+
+}
+
 
 /*--FUNCIONES QUE SE EJECUTAN UNA SOLA VEZ--*/
 void setup(void) {
@@ -262,7 +319,7 @@ void setup(void) {
     }
   Serial.println("NDEF Reader");
   crear_arreglo_funcionalidades();   
-  inicializar_sonido(); 
+  //inicializar_sonido(); 
   nfc.begin();
 }
 /*------------------------------------------*/
@@ -282,7 +339,7 @@ void loop(void) {
       char *ptrUID = NULL;
       ptrUID = new char[TagUID.length() + 1];
       strcpy(ptrUID, TagUID.c_str());
-
+      Serial.println();
       if(!strcmp(ptrUID, "A3 CE 89 94") || !strcmp(ptrUID, "43 26 C4 12") || !strcmp(ptrUID, "E3 F3 F0 94") ||  !strcmp(ptrUID, "E3 FC B3 12")){ //Condicional de mas
         if(!strcmp(ptrUID, "A3 CE 89 94")){
           if(!comenzar_programa){
@@ -328,7 +385,11 @@ void loop(void) {
   
      do{
 
-        imprimir_lista(); //cambiar por un llamado a cada funcionalidad en secuencia
+        imprimir_lista(); 
+        
+        Serial.println("/*---EJECUCION PROGRAMA----*/");
+        ejecutar_instrucciones_programa();
+        //cambiar por un llamado a cada funcionalidad en secuencia
         //Serial.println("A ejecutar funcionalidades");
         //ejecutar_funcionalidades();
         volver_a_comenzar--;
