@@ -32,14 +32,16 @@ typedef struct Funcionalidad {
 	char *UID;
 	void *Ptr_func;
   int type;
-  struct Funcionalidad *next_func;
-  struct Funcionalidad *next_func_conc;
+  struct Funcionalidad *next_func;  //verificar si se eliimina
+  struct Funcionalidad *next_func_conc; //verificar si se elimina
   unsigned long exec_time;
 }Funcionalidades;
 
 typedef struct Instrucciones{
   int pos;
-  Instrucciones *next_func;
+  struct Instrucciones *next_func_seq;
+  struct Instrucciones *next_func_conc;
+
 }Instrucciones;
 /*----------------------*/
 
@@ -52,6 +54,7 @@ bool comenzar_programa = false;
 bool finalizar_programa = false;
 int volver_a_comenzar = 0;
 bool ejecutar_programa = false;
+Instrucciones *Bloque_inst = NULL;
 /*-------------------------------*/
 
 
@@ -68,9 +71,11 @@ Instrucciones *crear_nueva_instruccion(int posicion){
   }
 
   nuevo_elemento-> pos = posicion;
-  nuevo_elemento->next_func = NULL;
-  Serial.print("POS ALMACENADA: ");
-  Serial.println(nuevo_elemento->pos);
+  nuevo_elemento->next_func_seq = NULL;
+  nuevo_elemento->next_func_conc = NULL;
+
+  Serial.print("POSICION ALMACENADA->");
+  Serial.println(nuevo_elemento->pos,1);
 
 return nuevo_elemento;
 }
@@ -84,10 +89,10 @@ void almacenar_instruccion_memoria(int posicion){
     else {
       Instrucciones *Ptr_aux = memoria;
 
-      while(Ptr_aux->next_func != NULL){
-        Ptr_aux = Ptr_aux->next_func;
+      while(Ptr_aux->next_func_seq != NULL){
+        Ptr_aux = Ptr_aux->next_func_seq;
       }
-      Ptr_aux->next_func = nuevo_elemento;
+      Ptr_aux->next_func_seq = nuevo_elemento;
     }
   }
 
@@ -235,7 +240,7 @@ void limpiar_memoria(){
   Instrucciones *Ptr_aux = NULL;
 
   for(Instrucciones *Ptr = memoria; Ptr != NULL;  ){
-    Ptr_aux = Ptr->next_func;
+    Ptr_aux = Ptr->next_func_seq;
     free(Ptr);
     Ptr = Ptr_aux;
   }
@@ -245,7 +250,7 @@ void limpiar_memoria(){
 int tamano_memoria(){
   int tam = 0;
   
-  for(Instrucciones *Ptr_aux = memoria; Ptr_aux != NULL; Ptr_aux = Ptr_aux->next_func ){
+  for(Instrucciones *Ptr_aux = memoria; Ptr_aux != NULL; Ptr_aux = Ptr_aux->next_func_seq ){
     tam++;
   }
 return tam;}
@@ -254,7 +259,7 @@ void imprimir_lista(){
 
   Serial.println("IMPRIMIENDO");
 
-  for(Instrucciones *Ptr_aux = memoria; Ptr_aux != NULL; Ptr_aux = Ptr_aux->next_func ){
+  for(Instrucciones *Ptr_aux = memoria; Ptr_aux != NULL; Ptr_aux = Ptr_aux->next_func_seq ){
     Serial.print("Posicion ");
     Serial.print(Ptr_aux->pos,1);
     Serial.println();
@@ -262,77 +267,90 @@ void imprimir_lista(){
   }
 }
 
-void almacenar_instrucciones_concurrentes(int posicion, Instrucciones *Bloque_inst){
-  Instrucciones *nuevo_elemento = crear_nueva_instruccion(posicion);
+//int posicion es la posicion de la funcionalidad dentro del arreglo de funcionalidades
+//Bloque_Inst es el puntero que guarda las intrucciones del bloque a ejecutar
+
+void almacenar_instrucciones_concurrentes(int posicion){ //RECIBE EL PTR A BLOQUE DE INST QUE SE CREA EN ORDENAR FUNCIONALIDADES PARA MODIFICARLO y almacenar la funcionalidad dependiendo de su tipo
+  Instrucciones *nuevo_elemento = crear_nueva_instruccion(posicion), *Ptr_ant_conc = NULL; // se Crea un nuevo elemento con la posicion de la funcionalidad en el arreglo de funcionalidades
+  bool flag_sec = false; // bandera que indica si se trata de una inst secuencial 
+
+  Serial.println("ALMACENANDO INSTRUCCIONES CONCURRENTES");
   //PRIMER ELEMENTO
-  if(Bloque_inst == NULL){
-    Bloque_inst = nuevo_elemento;
+  if(Bloque_inst == NULL){ //si no se ha cfeado ningun elemento
+    Bloque_inst = nuevo_elemento; 
   }
     else {
-      Instrucciones *Ptr_aux = Bloque_inst;
 
-      while(Ptr_aux->next_func != NULL){
-        Ptr_aux = Ptr_aux->next_func;
+      //SI YA HAY ELEMENTOS ALMACENADOS RECORRE BLOQUE INST DESDE EL PTR CONC
+      
+      for(Instrucciones *Ptr_aux_conc = Bloque_inst; Ptr_aux_conc != NULL ; Ptr_aux_conc = Ptr_aux_conc->next_func_conc){ //TOMA CADA ELEMENTO CONCURRENTE
+        Serial.print("E->");
+        Serial.print(funcionalidades[Ptr_aux_conc->pos]->type,1);
+        Serial.print("   I->");
+        Serial.println(funcionalidades[posicion]->type,1);
+
+
+        if(funcionalidades[Ptr_aux_conc->pos]->type == funcionalidades[posicion]->type){ //COMPARAS SI EL TIPO DEL ELEMENTO CONC ACTUAL ES IGUAL AL TIPO DEL ELEMENTO QUE QUIERES INTRODUCIR
+          Serial.print("ENTRO SEC ");
+          Serial.print(funcionalidades[Ptr_aux_conc->pos]->type,1);
+          Serial.print("   ");
+          Serial.print(funcionalidades[posicion]->type, 1);
+          Serial.println();
+          Instrucciones *Ptr_aux_seq = Ptr_aux_conc;  //SI ES IGUAL INICIALIZAS UN NUEVO PUNTERO DESDE ESA POSICION
+
+          while(Ptr_aux_seq->next_func_seq != NULL){  //RECORRES ESE PUNTERO CON EL NEXT FUNC SEC HASTA LLEGAR AL ULTIMO ELEMENTO
+            Ptr_aux_seq = Ptr_aux_seq->next_func_seq;
+          }
+          Ptr_aux_seq->next_func_seq = nuevo_elemento; // ANADES EL ELEMENTO AL FINAL DE ESA LINEA DE SEC
+          flag_sec = true;
+          break;
+        } 
+
+        Ptr_ant_conc = Ptr_aux_conc;
       }
-      Ptr_aux->next_func = nuevo_elemento;
+      if(!flag_sec){
+        Ptr_ant_conc->next_func_conc = nuevo_elemento;
+      }
     }
   }
 
+void imprimir_bloque_instrucciones_concurrentes(){
+  int i = 0;
+  Serial.println("/*------IMPRIMIR INSTRUCCIONES CONCURRENTES------*/");
 
-Funcionalidad *ordenar_bloque_instrucciones_concurrentes(int pos_inicial, int pos_final, int nro_tarjetas, Instrucciones *Ptr_inicial, Instrucciones * Ptr_final){
+  if(Bloque_inst == NULL){
+    Serial.println("PTR BLOQUE INST ES NULL");
+  }
 
-  Instrucciones *Bloque_inst = NULL, *Ptr_aux = Ptr_inicial;
+  for(Instrucciones *Ptr_aux_conc = Bloque_inst; Ptr_aux_conc != NULL ; Ptr_aux_conc =  Ptr_aux_conc ->next_func_conc){
+    i++;
+    Serial.print("GRUPO ");
+    Serial.println(i,1);
+
+      for(Instrucciones *Ptr_aux_sec = Ptr_aux_conc; Ptr_aux_sec != NULL ; Ptr_aux_sec = Ptr_aux_sec ->next_func_seq){
+        Serial.print("POSICION->  ");
+        Serial.print(Ptr_aux_sec->pos,1);
+        Serial.print(", ");
+      }    
+      Serial.println();
+  }
+  Serial.println("/*--------------------------------------------*/");
+}
+
+Funcionalidad *ordenar_bloque_instrucciones_concurrentes(int pos_inicial, int pos_final, int nro_tarjetas, Instrucciones *Ptr_inicial){
+
+  Instrucciones  *Ptr_aux = Ptr_inicial;
   int tag3 = 0, tag4 = 0, tag5 = 0, tag6 = 0, tag7 = 0;
    
   for (int i = pos_inicial; i <= pos_final; i++){
-    Serial.print("DESDE: ");
-    Serial.print(pos_inicial,1);
-    Serial.print("  HASTA:");
-    Serial.println(pos_final,1);
-
-    if(funcionalidades[Ptr_aux ->pos]->type == 3){
-      Serial.println("Encontro una tipo 3");  
-      tag3++; 
-    }
-
-    if(funcionalidades[Ptr_aux ->pos]->type == 4){
-      Serial.println("Encontro una tipo 4"); 
-      tag4++;   
-    }
-
+    almacenar_instrucciones_concurrentes(Ptr_aux->pos);
+    Ptr_aux = Ptr_aux->next_func_seq;
     
-    if(funcionalidades[Ptr_aux ->pos]->type == 5){
-      Serial.println("Encontro una tipo 5");
-      tag5++;    
-    }
-
-        
-    if(funcionalidades[Ptr_aux ->pos]->type == 6){
-      Serial.println("Encontro una tipo 6");   
-      tag6++; 
-    }
-
-        
-    if(funcionalidades[Ptr_aux ->pos]->type == 7){
-      Serial.println("Encontro una tipo 7");   
-      tag7++; 
-    }
-     Ptr_aux = Ptr_aux->next_func;
     //VE PREGUNTANDO EN ESE BLOQUE DE INSTRUCCIONES EL TIPO DE CAJA UNA Y LO ALMACENAS EN MATRIZ DE CONCURRECIA
   }
 
-  Serial.println("/*---------TARJETAS CONTADAS---------*/");
-  Serial.print("TAG 3: ");
-  Serial.println(tag3,1);
-  Serial.print("TAG 4: ");
-  Serial.println(tag4,1);
-  Serial.print("TAG 5: ");
-  Serial.println(tag5,1);
-  Serial.print("TAG 6: ");
-  Serial.println(tag6,1);
-  Serial.print("TAG 7: ");
-  Serial.println(tag7,1);
-  Serial.println("/*------------------------------------*/");
+  imprimir_bloque_instrucciones_concurrentes();
+  Bloque_inst = NULL;
 }
 
 
@@ -341,43 +359,21 @@ void ejecutar_instrucciones_programa(){
   int pos_inicial = 0, pos_final = 0, i = 0, nro_tarjetas = 0;
   Instrucciones *Ptr_inicial = memoria, *Ptr_final = NULL;
 
-  for(Instrucciones *Ptr_aux = memoria; Ptr_aux != NULL; Ptr_aux = Ptr_aux->next_func ){
+  for(Instrucciones *Ptr_aux = memoria; Ptr_aux != NULL; Ptr_aux = Ptr_aux->next_func_seq ){
     nro_tarjetas++;
 
-    Serial.print("INDICE "); 
-    Serial.println(i,1);
-
-    Serial.print("POS INICIAL ");
-    Serial.println(pos_inicial,1);
-
     if(!strcmp(funcionalidades[Ptr_aux ->pos]->UID, "B3 54 7A 12" )){
-
-      Serial.print("POS FINAL");
       pos_final = i - 1;
-
-      Serial.println(pos_final,1);
-      Serial.print("PTR FINAL: ");
-      Serial.println(funcionalidades[Ptr_final->pos]-> UID);
-
-      ordenar_bloque_instrucciones_concurrentes(pos_inicial, pos_final, nro_tarjetas, Ptr_inicial, Ptr_final);
+      ordenar_bloque_instrucciones_concurrentes(pos_inicial, pos_final, nro_tarjetas, Ptr_inicial);
       
-      Serial.print("POS INICIAL ");
       pos_inicial = i + 1;
-      Ptr_inicial = Ptr_aux->next_func;
-      Serial.println(pos_inicial,1);
-
-      
-      Serial.print("NRO. TARJETAS");
-      Serial.println(nro_tarjetas-1,1);
+      Ptr_inicial = Ptr_aux->next_func_seq;
       nro_tarjetas = 0;
       
     }
 
     Ptr_final = Ptr_aux;
-
-  i++;
-  
-
+    i++;
   }
 
 }
