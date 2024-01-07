@@ -32,72 +32,29 @@ typedef struct Funcionalidad {
 	char *UID;
 	void *Ptr_func;
   int type;
-  struct Funcionalidad *next_func;  //verificar si se eliimina
-  struct Funcionalidad *next_func_conc; //verificar si se elimina
+  struct Funcionalidad *next_func; 
   unsigned long exec_time;
 }Funcionalidades;
 
-typedef struct Instrucciones{
-  int pos;
-  struct Instrucciones *next_func_seq;
-  struct Instrucciones *next_func_conc;
-
-}Instrucciones;
 /*----------------------*/
 
 /*------VARIABLES GLOBALES------*/
 int count = 0;
 Funcionalidad **funcionalidades = NULL;
-Instrucciones *memoria = NULL;
 bool sonido = false;
 bool comenzar_programa = false;
 bool finalizar_programa = false;
 int volver_a_comenzar = 0;
 bool ejecutar_programa = false;
-Instrucciones *Bloque_inst = NULL;
 /*-------------------------------*/
 
 
 
 /*--------------------------------------------FUNCIONALIDADES---------------------------------------*/
 
-Instrucciones *crear_nueva_instruccion(int posicion){
-  
-  Instrucciones *nuevo_elemento = NULL;
-
-	if ((nuevo_elemento = (Instrucciones *) malloc(sizeof (Instrucciones))) == NULL){
-		Serial.println("nuevaFunc: error en el malloc\n");
-		exit(1);
-  }
-
-  nuevo_elemento-> pos = posicion;
-  nuevo_elemento->next_func_seq = NULL;
-  nuevo_elemento->next_func_conc = NULL;
-
-  Serial.print("POSICION ALMACENADA->");
-  Serial.println(nuevo_elemento->pos,1);
-
-return nuevo_elemento;
-}
-
-void almacenar_instruccion_memoria(int posicion){
-  Instrucciones *nuevo_elemento = crear_nueva_instruccion(posicion);
-  //PRIMER ELEMENTO
-  if(memoria == NULL){
-    memoria = nuevo_elemento;
-  }
-    else {
-      Instrucciones *Ptr_aux = memoria;
-
-      while(Ptr_aux->next_func_seq != NULL){
-        Ptr_aux = Ptr_aux->next_func_seq;
-      }
-      Ptr_aux->next_func_seq = nuevo_elemento;
-    }
-  }
 
 /*----CREA UNA NUEVA FUNCIONALIDAD PARTIENDO DE SU UID Y EL PUNTERO A LA FUNCION QUE CORRESPONDE----*/
-Funcionalidad *crear_nueva_funcionalidad(String UID, void (*Ptr)(), int type, Funcionalidad *next_func, Funcionalidad *next_func_conc, unsigned long exec_time){
+Funcionalidad *crear_nueva_funcionalidad(String UID, void (*Ptr)(), int type, Funcionalidad *next_func, unsigned long exec_time){
 	Funcionalidad *nueva_func = NULL;
   char *puntero = NULL;
 
@@ -110,7 +67,6 @@ Funcionalidad *crear_nueva_funcionalidad(String UID, void (*Ptr)(), int type, Fu
   nueva_func-> Ptr_func = NULL;
   nueva_func -> type = -1;
   nueva_func -> next_func = NULL;
-  nueva_func -> next_func_conc = NULL;
   nueva_func -> exec_time = 0;
 
   String cadena = UID;
@@ -123,7 +79,6 @@ Funcionalidad *crear_nueva_funcionalidad(String UID, void (*Ptr)(), int type, Fu
   nueva_func-> Ptr_func = Ptr;
   nueva_func -> type = type;
   nueva_func -> next_func = next_func;
-  nueva_func ->next_func_conc = next_func_conc;
   nueva_func -> exec_time = exec_time;
 
 return nueva_func;}
@@ -139,33 +94,33 @@ void crear_arreglo_funcionalidades(){
 		exit(1);
   }
 
-  funcionalidades[0] = crear_nueva_funcionalidad("B3 54 7A 12", &prueba, 1, NULL, NULL,0); //SINCRONIZACION
-  funcionalidades[1] = crear_nueva_funcionalidad("E3 F3 F0 94", &prueba, 1, NULL, NULL,0); //VOLVER A COMENZAR
-  funcionalidades[2] = crear_nueva_funcionalidad("A3 CE 89 94", &prueba, 1, NULL, NULL,0); //COMENZAR PROGRAMA
-  funcionalidades[3] = crear_nueva_funcionalidad("43 26 C4 12", &prueba, 1, NULL, NULL,0); //FINALIZAR PROGRAMA
-  funcionalidades[4] = crear_nueva_funcionalidad("A3 3E 72 94", &prueba, 0, NULL, NULL,0); //BORRAR
-  funcionalidades[5] = crear_nueva_funcionalidad("E3 FC B3 12", &prueba, 2, NULL, NULL,0); //EJECUTAR PROGRAMA
-  funcionalidades[6] = crear_nueva_funcionalidad("93 02 86 94", &prueba, 2, NULL, NULL,0); //PAUSAR
-  funcionalidades[7] = crear_nueva_funcionalidad("53 12 73 94", &prueba, 3, NULL, NULL,5000); //MOVER CABEZA A LA IZQUIERDA
-  funcionalidades[8] = crear_nueva_funcionalidad("F3 94 8B 94", &prueba, 3, NULL, NULL,5000); //MOVER CABEZA A LA DERECHA
-  funcionalidades[9] = crear_nueva_funcionalidad("33 22 B7 94", &prueba, 3, NULL, NULL,5000); //AGITAR COLA
-  funcionalidades[10] = crear_nueva_funcionalidad("83 0E AA 12", &prueba, 4, NULL, NULL,5000); //AVANZAR
-  funcionalidades[11] = crear_nueva_funcionalidad("13 45 8A 94", &prueba, 4, NULL, NULL,5000); //GIRAR A LA DERECHA
-  funcionalidades[12] = crear_nueva_funcionalidad("D3 DF 81 94", &prueba, 4, NULL, NULL,5000); //GIRAR SOBRE SI MISMO
-  funcionalidades[13] = crear_nueva_funcionalidad("B3 23 8F 94", &prueba, 4, NULL, NULL,5000); //VOLVER POR LA DERECHA
-  funcionalidades[14] = crear_nueva_funcionalidad("13 63 6B 94", &prueba, 4, NULL, NULL,5000); //RETROCEDER
-  funcionalidades[15] = crear_nueva_funcionalidad("83 11 6B 94", &prueba, 4, NULL, NULL,5000); //GIRAR A LA IZQUIERDA
-  funcionalidades[16] = crear_nueva_funcionalidad("33 09 BB 94", &prueba, 4, NULL, NULL,5000); //EVITAR OBSTACULOS
-  funcionalidades[17] = crear_nueva_funcionalidad("93 E2 20 95", &prueba, 4, NULL, NULL,5000); //VOLVER POR LA IZQUIERDA
-  funcionalidades[18] = crear_nueva_funcionalidad("23 DE 6C 94", &prueba, 5, NULL, NULL,5000); //ENCENDER LUCES
-  funcionalidades[19] = crear_nueva_funcionalidad("13 7C 72 94", &prueba, 5, NULL, NULL,5000); //APAGAR LUCES
-  funcionalidades[20] = crear_nueva_funcionalidad("F3 A9 89 94", &prueba, 6, NULL, NULL,5000); //ABRIR OJOS
-  funcionalidades[21] = crear_nueva_funcionalidad("93 D3 80 94", &prueba, 6, NULL, NULL,5000); //CERRAR OJOS
-  funcionalidades[22] = crear_nueva_funcionalidad("63 36 C6 94", &prueba, 6, NULL, NULL,5000); //PESTANEAR
-  funcionalidades[23] = crear_nueva_funcionalidad("D3 12 74 94", &prueba, 7, NULL, NULL,5000); //GRABAR AUDIO
-  funcionalidades[24] = crear_nueva_funcionalidad("53 2D 89 94", &prueba,7, NULL, NULL,5000); //REPRODUCIR AUDIO
-  funcionalidades[25] = crear_nueva_funcionalidad("A3 7A CB 94", &emitir_sonido, 7, NULL, NULL,15000); //EMITIR SONIDO
-  funcionalidades[26] = crear_nueva_funcionalidad("E3 F7 A7 12", &pausar_sonido, 7, NULL, NULL,5000); //SILENCIAR
+  funcionalidades[0] = crear_nueva_funcionalidad("B3 54 7A 12", &prueba, 1, NULL,0); //SINCRONIZACION
+  funcionalidades[1] = crear_nueva_funcionalidad("E3 F3 F0 94", &prueba, 1, NULL,0); //VOLVER A COMENZAR
+  funcionalidades[2] = crear_nueva_funcionalidad("A3 CE 89 94", &prueba, 1, NULL,0); //COMENZAR PROGRAMA
+  funcionalidades[3] = crear_nueva_funcionalidad("43 26 C4 12", &prueba, 1, NULL,0); //FINALIZAR PROGRAMA
+  funcionalidades[4] = crear_nueva_funcionalidad("A3 3E 72 94", &prueba, 0, NULL,0); //BORRAR
+  funcionalidades[5] = crear_nueva_funcionalidad("E3 FC B3 12", &prueba, 2, NULL,0); //EJECUTAR PROGRAMA
+  funcionalidades[6] = crear_nueva_funcionalidad("93 02 86 94", &prueba, 2, NULL,0); //PAUSAR
+  funcionalidades[7] = crear_nueva_funcionalidad("53 12 73 94", &prueba, 3, NULL,5000); //MOVER CABEZA A LA IZQUIERDA
+  funcionalidades[8] = crear_nueva_funcionalidad("F3 94 8B 94", &prueba, 3, NULL,5000); //MOVER CABEZA A LA DERECHA
+  funcionalidades[9] = crear_nueva_funcionalidad("33 22 B7 94", &prueba, 3, NULL,5000); //AGITAR COLA
+  funcionalidades[10] = crear_nueva_funcionalidad("83 0E AA 12", &prueba, 4, NULL,5000); //AVANZAR
+  funcionalidades[11] = crear_nueva_funcionalidad("13 45 8A 94", &prueba, 4, NULL, 5000); //GIRAR A LA DERECHA
+  funcionalidades[12] = crear_nueva_funcionalidad("D3 DF 81 94", &prueba, 4, NULL,5000); //GIRAR SOBRE SI MISMO
+  funcionalidades[13] = crear_nueva_funcionalidad("B3 23 8F 94", &prueba, 4, NULL,5000); //VOLVER POR LA DERECHA
+  funcionalidades[14] = crear_nueva_funcionalidad("13 63 6B 94", &prueba, 4, NULL,5000); //RETROCEDER
+  funcionalidades[15] = crear_nueva_funcionalidad("83 11 6B 94", &prueba, 4, NULL, 5000); //GIRAR A LA IZQUIERDA
+  funcionalidades[16] = crear_nueva_funcionalidad("33 09 BB 94", &prueba, 4, NULL,5000); //EVITAR OBSTACULOS
+  funcionalidades[17] = crear_nueva_funcionalidad("93 E2 20 95", &prueba, 4, NULL, 5000); //VOLVER POR LA IZQUIERDA
+  funcionalidades[18] = crear_nueva_funcionalidad("23 DE 6C 94", &prueba, 5, NULL, 5000); //ENCENDER LUCES
+  funcionalidades[19] = crear_nueva_funcionalidad("13 7C 72 94", &prueba, 5, NULL, 5000); //APAGAR LUCES
+  funcionalidades[20] = crear_nueva_funcionalidad("F3 A9 89 94", &prueba, 6, NULL, 5000); //ABRIR OJOS
+  funcionalidades[21] = crear_nueva_funcionalidad("93 D3 80 94", &prueba, 6, NULL, 5000); //CERRAR OJOS
+  funcionalidades[22] = crear_nueva_funcionalidad("63 36 C6 94", &prueba, 6, NULL, 5000); //PESTANEAR
+  funcionalidades[23] = crear_nueva_funcionalidad("D3 12 74 94", &prueba, 7, NULL,5000); //GRABAR AUDIO
+  funcionalidades[24] = crear_nueva_funcionalidad("53 2D 89 94", &prueba,7, NULL,5000); //REPRODUCIR AUDIO
+  funcionalidades[25] = crear_nueva_funcionalidad("A3 7A CB 94", &emitir_sonido, 7, NULL,15000); //EMITIR SONIDO
+  funcionalidades[26] = crear_nueva_funcionalidad("E3 F7 A7 12", &pausar_sonido, 7, NULL,5000); //SILENCIAR
 
   /*-----------------------COLORES--------------------*/
   /*funcionalidades[27] = nuevaFuncionalidad("", &prueba);
@@ -188,7 +143,7 @@ void encontrar_funcionalidad_tarjeta(char* UID){
 
   for(int i = 0; i < 35; i++ ){
     if(! strcmp(UID,funcionalidades[i]-> UID)){
-      almacenar_instruccion_memoria(i);
+      //almacenar_instruccion_memoria(i);
       return;  
     }
   }
@@ -235,150 +190,6 @@ void pausar_sonido(char *UID){
   delay(100);*/
 }
 
-void limpiar_memoria(){
-
-  Instrucciones *Ptr_aux = NULL;
-
-  for(Instrucciones *Ptr = memoria; Ptr != NULL;  ){
-    Ptr_aux = Ptr->next_func_seq;
-    free(Ptr);
-    Ptr = Ptr_aux;
-  }
-  memoria = NULL;
-}
-
-int tamano_memoria(){
-  int tam = 0;
-  
-  for(Instrucciones *Ptr_aux = memoria; Ptr_aux != NULL; Ptr_aux = Ptr_aux->next_func_seq ){
-    tam++;
-  }
-return tam;}
-
-void imprimir_lista(){
-
-  Serial.println("IMPRIMIENDO");
-
-  for(Instrucciones *Ptr_aux = memoria; Ptr_aux != NULL; Ptr_aux = Ptr_aux->next_func_seq ){
-    Serial.print("Posicion ");
-    Serial.print(Ptr_aux->pos,1);
-    Serial.println();
-    Serial.println(funcionalidades[Ptr_aux->pos]->UID);
-  }
-}
-
-//int posicion es la posicion de la funcionalidad dentro del arreglo de funcionalidades
-//Bloque_Inst es el puntero que guarda las intrucciones del bloque a ejecutar
-
-void almacenar_instrucciones_concurrentes(int posicion){ //RECIBE EL PTR A BLOQUE DE INST QUE SE CREA EN ORDENAR FUNCIONALIDADES PARA MODIFICARLO y almacenar la funcionalidad dependiendo de su tipo
-  Instrucciones *nuevo_elemento = crear_nueva_instruccion(posicion), *Ptr_ant_conc = NULL; // se Crea un nuevo elemento con la posicion de la funcionalidad en el arreglo de funcionalidades
-  bool flag_sec = false; // bandera que indica si se trata de una inst secuencial 
-
-  Serial.println("ALMACENANDO INSTRUCCIONES CONCURRENTES");
-  //PRIMER ELEMENTO
-  if(Bloque_inst == NULL){ //si no se ha cfeado ningun elemento
-    Bloque_inst = nuevo_elemento; 
-  }
-    else {
-
-      //SI YA HAY ELEMENTOS ALMACENADOS RECORRE BLOQUE INST DESDE EL PTR CONC
-      
-      for(Instrucciones *Ptr_aux_conc = Bloque_inst; Ptr_aux_conc != NULL ; Ptr_aux_conc = Ptr_aux_conc->next_func_conc){ //TOMA CADA ELEMENTO CONCURRENTE
-        Serial.print("E->");
-        Serial.print(funcionalidades[Ptr_aux_conc->pos]->type,1);
-        Serial.print("   I->");
-        Serial.println(funcionalidades[posicion]->type,1);
-
-
-        if(funcionalidades[Ptr_aux_conc->pos]->type == funcionalidades[posicion]->type){ //COMPARAS SI EL TIPO DEL ELEMENTO CONC ACTUAL ES IGUAL AL TIPO DEL ELEMENTO QUE QUIERES INTRODUCIR
-          Serial.print("ENTRO SEC ");
-          Serial.print(funcionalidades[Ptr_aux_conc->pos]->type,1);
-          Serial.print("   ");
-          Serial.print(funcionalidades[posicion]->type, 1);
-          Serial.println();
-          Instrucciones *Ptr_aux_seq = Ptr_aux_conc;  //SI ES IGUAL INICIALIZAS UN NUEVO PUNTERO DESDE ESA POSICION
-
-          while(Ptr_aux_seq->next_func_seq != NULL){  //RECORRES ESE PUNTERO CON EL NEXT FUNC SEC HASTA LLEGAR AL ULTIMO ELEMENTO
-            Ptr_aux_seq = Ptr_aux_seq->next_func_seq;
-          }
-          Ptr_aux_seq->next_func_seq = nuevo_elemento; // ANADES EL ELEMENTO AL FINAL DE ESA LINEA DE SEC
-          flag_sec = true;
-          break;
-        } 
-
-        Ptr_ant_conc = Ptr_aux_conc;
-      }
-      if(!flag_sec){
-        Ptr_ant_conc->next_func_conc = nuevo_elemento;
-      }
-    }
-  }
-
-void imprimir_bloque_instrucciones_concurrentes(){
-  int i = 0;
-  Serial.println("/*------IMPRIMIR INSTRUCCIONES CONCURRENTES------*/");
-
-  if(Bloque_inst == NULL){
-    Serial.println("PTR BLOQUE INST ES NULL");
-  }
-
-  for(Instrucciones *Ptr_aux_conc = Bloque_inst; Ptr_aux_conc != NULL ; Ptr_aux_conc =  Ptr_aux_conc ->next_func_conc){
-    i++;
-    Serial.print("GRUPO ");
-    Serial.println(i,1);
-
-      for(Instrucciones *Ptr_aux_sec = Ptr_aux_conc; Ptr_aux_sec != NULL ; Ptr_aux_sec = Ptr_aux_sec ->next_func_seq){
-        Serial.print("POSICION->  ");
-        Serial.print(Ptr_aux_sec->pos,1);
-        Serial.print(", ");
-      }    
-      Serial.println();
-  }
-  Serial.println("/*--------------------------------------------*/");
-}
-
-Funcionalidad *ordenar_bloque_instrucciones_concurrentes(int pos_inicial, int pos_final, int nro_tarjetas, Instrucciones *Ptr_inicial){
-
-  Instrucciones  *Ptr_aux = Ptr_inicial;
-  int tag3 = 0, tag4 = 0, tag5 = 0, tag6 = 0, tag7 = 0;
-   
-  for (int i = pos_inicial; i <= pos_final; i++){
-    almacenar_instrucciones_concurrentes(Ptr_aux->pos);
-    Ptr_aux = Ptr_aux->next_func_seq;
-    
-    //VE PREGUNTANDO EN ESE BLOQUE DE INSTRUCCIONES EL TIPO DE CAJA UNA Y LO ALMACENAS EN MATRIZ DE CONCURRECIA
-  }
-
-  imprimir_bloque_instrucciones_concurrentes();
-  Bloque_inst = NULL;
-}
-
-
-void ejecutar_instrucciones_programa(){
-
-  int pos_inicial = 0, pos_final = 0, i = 0, nro_tarjetas = 0;
-  Instrucciones *Ptr_inicial = memoria, *Ptr_final = NULL;
-
-  for(Instrucciones *Ptr_aux = memoria; Ptr_aux != NULL; Ptr_aux = Ptr_aux->next_func_seq ){
-    nro_tarjetas++;
-
-    if(!strcmp(funcionalidades[Ptr_aux ->pos]->UID, "B3 54 7A 12" )){
-      pos_final = i - 1;
-      ordenar_bloque_instrucciones_concurrentes(pos_inicial, pos_final, nro_tarjetas, Ptr_inicial);
-      
-      pos_inicial = i + 1;
-      Ptr_inicial = Ptr_aux->next_func_seq;
-      nro_tarjetas = 0;
-      
-    }
-
-    Ptr_final = Ptr_aux;
-    i++;
-  }
-
-}
-
-
 /*--FUNCIONES QUE SE EJECUTAN UNA SOLA VEZ--*/
 void setup(void) {
     Serial.begin(9600);
@@ -393,12 +204,24 @@ void setup(void) {
 /*------------------------------------------*/
 
 
+void imprimir_funcionalidades(){
+  Serial.println("IMPRIMIENDO FUNCIONALIDADES POR DEFAULT");
+  String UID;
+  for(int i = 0; i <= 26 ; i++){
+    UID = funcionalidades[i]->UID;
+    Serial.println(UID);
+    
+  }
+}
+
 
 /**---FUNCIONES QUE SE EJECUTAN N VECES----*/
 void loop(void) {
   Serial.println("\nScan a NFC tag\n");
 
-  while(!ejecutar_programa){
+  imprimir_funcionalidades();
+  delay(50000);
+ /* while(!ejecutar_programa){
 
     if (nfc.tagPresent()){
       NfcTag tag = nfc.read();
@@ -408,70 +231,14 @@ void loop(void) {
       ptrUID = new char[TagUID.length() + 1];
       strcpy(ptrUID, TagUID.c_str());
       Serial.println();
-      if(!strcmp(ptrUID, "A3 CE 89 94") || !strcmp(ptrUID, "43 26 C4 12") || !strcmp(ptrUID, "E3 F3 F0 94") ||  !strcmp(ptrUID, "E3 FC B3 12")){ //Condicional de mas
-        if(!strcmp(ptrUID, "A3 CE 89 94")){
-          if(!comenzar_programa){
-            comenzar_programa = true;
-          } 
-        }
-
-        if(!strcmp(ptrUID, "43 26 C4 12")){
-          if(comenzar_programa){
-            if(!finalizar_programa){
-              finalizar_programa = true;
-            } 
-          } 
-        }
-
-        if(!strcmp(ptrUID, "E3 F3 F0 94")){
-          if(comenzar_programa && finalizar_programa){
-            volver_a_comenzar++;
-          }
-          
-        }
-
-        if(!strcmp(ptrUID, "E3 FC B3 12")){
-          if(comenzar_programa && finalizar_programa){
-            ejecutar_programa = true;
-          }
-        }
-        
-      } else{
-
-          if(comenzar_programa && !finalizar_programa){
-            encontrar_funcionalidad_tarjeta(ptrUID);
-          } 
-        }  
-      }
     }
-    delay(5000); 
-
-    int tam_mem = tamano_memoria(); 
-
-    if(ejecutar_programa){
-      volver_a_comenzar++;
+      
+    delay(5000);
   
-     do{
+  }*/
 
-        imprimir_lista(); 
-        
-        Serial.println("/*---EJECUCION PROGRAMA----*/");
-        ejecutar_instrucciones_programa();
-        //cambiar por un llamado a cada funcionalidad en secuencia
-        //Serial.println("A ejecutar funcionalidades");
-        //ejecutar_funcionalidades();
-        volver_a_comenzar--;
 
-      } while(volver_a_comenzar > 0);   
 
-        ejecutar_programa = false;
-        comenzar_programa = false;
-        finalizar_programa = false;
-
-        if(memoria != NULL){
-          limpiar_memoria();
-      }
-    }
   }
 /*------------------------------------------*/
 
