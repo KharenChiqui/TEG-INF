@@ -1,5 +1,7 @@
 #include "DFRobotDFPlayerMini.h"
 #include "SoftwareSerial.h"
+#define cant_colum 4 //NUMERO DE COLUMNAS MEMORIA
+#define cant_filas 7 //NUMERO DE FILAS MEMORIA
 
 SoftwareSerial DFP(10,11); //comentar TX RX
 DFRobotDFPlayerMini MP3;
@@ -27,6 +29,7 @@ NfcAdapter nfc = NfcAdapter(pn532_i2c);
 #endif
 
 
+
 /*----TIPOS DE DATOS---*/
 typedef struct Funcionalidad {
 	char *UID;
@@ -41,6 +44,7 @@ typedef struct Funcionalidad {
 /*------VARIABLES GLOBALES------*/
 int count = 0;
 Funcionalidad **funcionalidades = NULL;
+int ***memoria_instrucciones = NULL;
 bool sonido = false;
 bool comenzar_programa = false;
 bool finalizar_programa = false;
@@ -84,6 +88,24 @@ Funcionalidad *crear_nueva_funcionalidad(String UID, void (*Ptr)(), int type, Fu
 return nueva_func;}
 /*-------------------------------------------------------------------------------------------------*/
 
+int crear_memoria_instrucciones(){
+
+  if (( memoria_instrucciones = (int ***) malloc(5* sizeof (int **))) == NULL){
+		Serial.println("nuevaFunc: error en el malloc\n");
+		exit(1);
+  }
+ 
+ for(int dim = 0; dim<5; dim++){
+  memoria_instrucciones[dim] = (int **) malloc(sizeof(int *)*8);
+ }
+
+  for(int colum = 0; colum < 5; colum++){
+    for(int filas = 0 ; filas <8; filas++)
+    {
+      memoria_instrucciones[colum][filas] = (int *) malloc(sizeof(int) * 5); 
+    }
+  }
+}
 
 /*---CREA UN ARREGLO CON LAS FUNCIONALIDADES Y LO INICIALIZA CON SUS RESPECTIVOS VALORES--*/
 void crear_arreglo_funcionalidades(){
@@ -161,6 +183,39 @@ void grabar_audio(){
   
 }
 
+void inicializar_memoria(){
+
+   for( int dim = 0 ; dim<5 ; dim++){
+    for(int filas = 0 ; filas<8 ; filas++){
+      for( int colum = 0 ; colum<5 ; colum++){
+          memoria_instrucciones[dim][filas][colum] = 0;
+    }   
+  }  
+  }
+Serial.println("TEMRINO DE IMPRIMIR EL ALMACENAMIENTO");
+  imprimir_matriz();
+ 
+}
+
+void imprimir_matriz(){
+
+  for( int dim = 0 ; dim<5 ; dim++){
+    Serial.print("/----DIMENSION----/: ");
+    Serial.println(dim,1);
+    for(int filas = 0 ; filas<8 ; filas++){
+       Serial.print("\n");
+      for( int colum = 0 ; colum<5 ; colum++){
+        Serial.print("\t");
+          Serial.print( memoria_instrucciones[dim][filas][colum],1);
+          Serial.print("\t");
+
+    }
+  }
+  Serial.println();
+  }
+
+}
+
 void inicializar_sonido(){
   DFP.begin(9600);
 
@@ -197,7 +252,10 @@ void setup(void) {
       
     }
   Serial.println("NDEF Reader");
-  crear_arreglo_funcionalidades();   
+  crear_arreglo_funcionalidades();  
+  crear_memoria_instrucciones();
+  inicializar_memoria();
+  //imprimir_matriz(); 
   //inicializar_sonido(); 
   nfc.begin();
 }
@@ -214,14 +272,83 @@ void imprimir_funcionalidades(){
   }
 }
 
+void introducir_columna_memoria(int indice_func, int colum){
+bool almacenado = false;
+Serial.println("COMENZANDO");
+ for( int i = 0 ; i<5 ; i++){
+  Serial.print("Dimension:");
+  Serial.println(i,1);
+      for( int j = 0 ; j<8 ; j++){
+          Serial.print("Fila:");
+          Serial.println(j,1);
+          if(memoria_instrucciones[i][j][colum] == 0){
+            Serial.println("ALMACENANDO");
+            almacenado = true;
+            memoria_instrucciones[i][j][colum] = indice_func;
+            return;
+          } //condicional que busque en otra dimension y guarde  si se acabaron las dimensiones emite notifiticacion
+    }   
+  
+  }
+
+  if(!almacenado){
+    Serial.println("NO HAY ESPACIO PARA ALMACENAR OTRA INSTRUCCION DE ESE TIPO");
+
+  }
+
+
+}
+int almacenar_instruccion(char *UID){
+  char  *UID_aux = NULL;
+  int tipo_inst = -1;
+
+  for(int i = 0; i <= 26 ; i++){ //se identifica
+    UID_aux = funcionalidades[i]->UID;
+    //Serial.println(UID + "-" + UID_aux);
+
+    if(strcmp(UID,UID_aux) == 0){
+      tipo_inst = funcionalidades[i]->type;
+      if(tipo_inst != 0 && tipo_inst != 1 && tipo_inst != 2){ //si no son instrucciones administrativas almacenalas en la matriz 
+        Serial.println("HELLO WORD");
+
+        switch(tipo_inst){
+          case 3: {
+            introducir_columna_memoria(i,0);
+            break;
+          }
+          case 4: {
+            introducir_columna_memoria(i,1);
+            break;
+          }
+          case 5: {
+             introducir_columna_memoria(i,2);
+            break;
+          }
+          case 6: {
+             introducir_columna_memoria(i,3);
+            break;
+          }
+          case 7:{
+             introducir_columna_memoria(i,4);
+            break;
+          }
+          default: Serial.println("LA INNSTRUCCION NO ESTA DISPONIBLE");
+        }
+        
+
+      }
+      Serial.println("ENCONTRO LA FUNCIONALIDAD");
+      return 1;
+    } 
+  }
+
+return 0;}
 
 /**---FUNCIONES QUE SE EJECUTAN N VECES----*/
 void loop(void) {
   Serial.println("\nScan a NFC tag\n");
-
-  imprimir_funcionalidades();
-  delay(50000);
- /* while(!ejecutar_programa){
+  
+ while(!ejecutar_programa){
 
     if (nfc.tagPresent()){
       NfcTag tag = nfc.read();
@@ -230,12 +357,18 @@ void loop(void) {
       char *ptrUID = NULL;
       ptrUID = new char[TagUID.length() + 1];
       strcpy(ptrUID, TagUID.c_str());
-      Serial.println();
+      Serial.println(ptrUID);
+      Serial.println("A buscar se ha dicho");
+      if (almacenar_instruccion(ptrUID)){
+        Serial.println("ENCONTRO LA TARJETA");
+        imprimir_matriz();
+      }
+
     }
       
-    delay(5000);
+    delay(1000);
   
-  }*/
+  }
 
 
 
