@@ -45,6 +45,7 @@ typedef struct Funcionalidad {
 int count = 0;
 Funcionalidad **funcionalidades = NULL;
 int ***memoria_instrucciones = NULL;
+int sincronizacion = 0;
 bool sonido = false;
 bool comenzar_programa = false;
 bool finalizar_programa = false;
@@ -159,17 +160,6 @@ void crear_arreglo_funcionalidades(){
 }
 /*-------------------------------------------------------------------------------------*/
 
-/*---ENCUENTRA LA FUNCIONALIDAD DE UNA TARJETA DADO SU UID---*/
-void encontrar_funcionalidad_tarjeta(char* UID){
-  bool flag = false;
-
-  for(int i = 0; i < 35; i++ ){
-    if(! strcmp(UID,funcionalidades[i]-> UID)){
-      //almacenar_instruccion_memoria(i);
-      return;  
-    }
-  }
-}
 /*----------------------------------------------------------*/
 void  prueba(){
   Serial.println("Entro a pruebita");
@@ -192,7 +182,6 @@ void inicializar_memoria(){
     }   
   }  
   }
-Serial.println("TEMRINO DE IMPRIMIR EL ALMACENAMIENTO");
   imprimir_matriz();
  
 }
@@ -263,7 +252,7 @@ void setup(void) {
 
 
 void imprimir_funcionalidades(){
-  Serial.println("IMPRIMIENDO FUNCIONALIDADES POR DEFAULT");
+ 
   String UID;
   for(int i = 0; i <= 26 ; i++){
     UID = funcionalidades[i]->UID;
@@ -272,24 +261,23 @@ void imprimir_funcionalidades(){
   }
 }
 
-void introducir_columna_memoria(int indice_func, int colum){
+void introducir_columna_memoria(int indice_func, int colum, int dim){
 bool almacenado = false;
-Serial.println("COMENZANDO");
- for( int i = 0 ; i<5 ; i++){
+
+
   Serial.print("Dimension:");
-  Serial.println(i,1);
+  Serial.println(dim,1);
       for( int j = 0 ; j<8 ; j++){
           Serial.print("Fila:");
           Serial.println(j,1);
-          if(memoria_instrucciones[i][j][colum] == 0){
-            Serial.println("ALMACENANDO");
+          if(memoria_instrucciones[dim][j][colum] == 0){
             almacenado = true;
-            memoria_instrucciones[i][j][colum] = indice_func;
+            memoria_instrucciones[dim][j][colum] = indice_func;
             return;
-          } //condicional que busque en otra dimension y guarde  si se acabaron las dimensiones emite notifiticacion
+          } 
     }   
   
-  }
+  
 
   if(!almacenado){
     Serial.println("NO HAY ESPACIO PARA ALMACENAR OTRA INSTRUCCION DE ESE TIPO");
@@ -306,30 +294,35 @@ int almacenar_instruccion(char *UID){
     UID_aux = funcionalidades[i]->UID;
     //Serial.println(UID + "-" + UID_aux);
 
-    if(strcmp(UID,UID_aux) == 0){
+    if(strcmp(UID,UID_aux) == 0){ 
       tipo_inst = funcionalidades[i]->type;
-      if(tipo_inst != 0 && tipo_inst != 1 && tipo_inst != 2){ //si no son instrucciones administrativas almacenalas en la matriz 
-        Serial.println("HELLO WORD");
 
+      if(i == 0){ //detecto una tarjeta de sincronizacion
+        Serial.println("ENTRO A SINCRONIZAR");   
+        sincronizacion ++; //Cada sincronizacion representa un bloque de instruccciones a almacenar, lo que a su vez representa una dimension
+      }
+
+      if(tipo_inst != 0 && tipo_inst != 1 && tipo_inst != 2){ //si no son instrucciones administrativas almacenalas en la matriz 
+        int dimen = sincronizacion;
         switch(tipo_inst){
           case 3: {
-            introducir_columna_memoria(i,0);
+            introducir_columna_memoria(i,0,dimen);
             break;
           }
           case 4: {
-            introducir_columna_memoria(i,1);
+            introducir_columna_memoria(i,1,dimen);
             break;
           }
           case 5: {
-             introducir_columna_memoria(i,2);
+             introducir_columna_memoria(i,2,dimen);
             break;
           }
           case 6: {
-             introducir_columna_memoria(i,3);
+             introducir_columna_memoria(i,3,dimen);
             break;
           }
           case 7:{
-             introducir_columna_memoria(i,4);
+             introducir_columna_memoria(i,4,dimen);
             break;
           }
           default: Serial.println("LA INNSTRUCCION NO ESTA DISPONIBLE");
@@ -337,7 +330,7 @@ int almacenar_instruccion(char *UID){
         
 
       }
-      Serial.println("ENCONTRO LA FUNCIONALIDAD");
+     
       return 1;
     } 
   }
@@ -349,7 +342,6 @@ void loop(void) {
   Serial.println("\nScan a NFC tag\n");
   
  while(!ejecutar_programa){
-
     if (nfc.tagPresent()){
       NfcTag tag = nfc.read();
       tag.print();
@@ -358,12 +350,12 @@ void loop(void) {
       ptrUID = new char[TagUID.length() + 1];
       strcpy(ptrUID, TagUID.c_str());
       Serial.println(ptrUID);
-      Serial.println("A buscar se ha dicho");
       if (almacenar_instruccion(ptrUID)){
         Serial.println("ENCONTRO LA TARJETA");
         imprimir_matriz();
-      }
 
+      }
+    //limpiar sincronizacion cada vez que vuelva a iterar 
     }
       
     delay(1000);
