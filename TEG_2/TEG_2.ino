@@ -182,8 +182,6 @@ void inicializar_memoria(){
     }   
   }  
   }
-  imprimir_matriz();
- 
 }
 
 void imprimir_matriz(){
@@ -244,7 +242,6 @@ void setup(void) {
   crear_arreglo_funcionalidades();  
   crear_memoria_instrucciones();
   inicializar_memoria();
-  //imprimir_matriz(); 
   //inicializar_sonido(); 
   nfc.begin();
 }
@@ -261,7 +258,7 @@ void imprimir_funcionalidades(){
   }
 }
 
-void introducir_columna_memoria(int indice_func, int colum, int dim){
+void introducir_inst_columna_memoria(int indice_func, int colum, int dim){
 bool almacenado = false;
 
 
@@ -289,59 +286,71 @@ bool almacenado = false;
 int almacenar_instruccion(char *UID){
   char  *UID_aux = NULL;
   int tipo_inst = -1;
+  bool vacio = false;
 
   for(int i = 0; i <= 26 ; i++){ //se identifica
     UID_aux = funcionalidades[i]->UID;
     //Serial.println(UID + "-" + UID_aux);
-
+    
     if(strcmp(UID,UID_aux) == 0){ 
       tipo_inst = funcionalidades[i]->type;
 
       if(i == 0 ){ //detecto una tarjeta de sincronizacion . REVISAR QUE LA MATRIZ NO ESTE VACIA PARA HACER EL CAMBIO DE CARA
-        Serial.println("ENTRO A SINCRONIZAR");   
-        sincronizacion ++; //Cada sincronizacion representa un bloque de instruccciones a almacenar, lo que a su vez representa una dimension
+        vacio = verificar_bloque_instrucciones_vacio(0);
+        if(!vacio){ 
+          sincronizacion ++; //Cada sincronizacion representa un bloque de instruccciones a almacenar, lo que a su vez representa una dimension
+        } 
       }
 
       if(tipo_inst != 0 && tipo_inst != 1 && tipo_inst != 2){ //si no son instrucciones administrativas almacenalas en la matriz 
         int dimen = sincronizacion;
         switch(tipo_inst){
           case 3: {
-            introducir_columna_memoria(i,0,dimen);
+            introducir_inst_columna_memoria(i,0,dimen);
             break;
           }
           case 4: {
-            introducir_columna_memoria(i,1,dimen);
+            introducir_inst_columna_memoria(i,1,dimen);
             break;
           }
           case 5: {
-             introducir_columna_memoria(i,2,dimen);
+             introducir_inst_columna_memoria(i,2,dimen);
             break;
           }
           case 6: {
-             introducir_columna_memoria(i,3,dimen);
+             introducir_inst_columna_memoria(i,3,dimen);
             break;
           }
           case 7:{
-             introducir_columna_memoria(i,4,dimen);
+             introducir_inst_columna_memoria(i,4,dimen);
             break;
           }
           default: Serial.println("LA INNSTRUCCION NO ESTA DISPONIBLE");
-        }
-        
-
+        }    
       }
-     
       return 1;
     } 
   }
-
 return 0;}
 
-/**---FUNCIONES QUE SE EJECUTAN N VECES----*/
-void loop(void) {
-  Serial.println("\nScan a NFC tag\n");
-  
-  while(!ejecutar_programa){
+bool verificar_bloque_instrucciones_vacio(int bloque){ //devuelve 1 si se encuentra vacio, 0 si esta lleno
+  int vacio = 0;
+
+  for(int i = 0 ; i<5 ; i++){
+    if(memoria_instrucciones[bloque][0][i] == 0){
+      vacio ++;
+    }
+  }
+    if(vacio == 5){
+      return true;
+    }else{
+      return false;
+    } 
+}
+
+void escanear_instrucciones(){
+
+   while(!ejecutar_programa){
 
     if (nfc.tagPresent()){
 
@@ -379,13 +388,28 @@ void loop(void) {
       }
     }
   }
+}
+
+/**---FUNCIONES QUE SE EJECUTAN N VECES----*/
+void loop(void) {
+
+  escanear_instrucciones();
 
   while(volver_a_comenzar >= 0){
-    
-    Serial.print("ITERACION NRO: ");
-    Serial.println(volver_a_comenzar);
+
+    Serial.print("**************ITERACION NRO: ");
+    Serial.print(volver_a_comenzar);
+    Serial.println("**************");
     volver_a_comenzar--;
+
+    while(true){
+      //Sacar la cuenta del tiempo maximo de todos los bloques que tegan instrucciones asi sabes cuanto tiene que durar la ejecucion de instrucciones cuando se llegue al tiempo corta el bucle
+    }
   }
+
+  volver_a_comenzar = 0;
+  inicializar_memoria();
+  ejecutar_programa = false;
 
   delay(1000);
 }
