@@ -297,7 +297,7 @@ int almacenar_instruccion(char *UID){
     if(strcmp(UID,UID_aux) == 0){ 
       tipo_inst = funcionalidades[i]->type;
 
-      if(i == 0){ //detecto una tarjeta de sincronizacion
+      if(i == 0 ){ //detecto una tarjeta de sincronizacion . REVISAR QUE LA MATRIZ NO ESTE VACIA PARA HACER EL CAMBIO DE CARA
         Serial.println("ENTRO A SINCRONIZAR");   
         sincronizacion ++; //Cada sincronizacion representa un bloque de instruccciones a almacenar, lo que a su vez representa una dimension
       }
@@ -341,8 +341,10 @@ return 0;}
 void loop(void) {
   Serial.println("\nScan a NFC tag\n");
   
- while(!ejecutar_programa){
+  while(!ejecutar_programa){
+
     if (nfc.tagPresent()){
+
       NfcTag tag = nfc.read();
       tag.print();
       String TagUID = tag.getUidString();
@@ -350,21 +352,43 @@ void loop(void) {
       ptrUID = new char[TagUID.length() + 1];
       strcpy(ptrUID, TagUID.c_str());
       Serial.println(ptrUID);
-      if (almacenar_instruccion(ptrUID)){
-        Serial.println("ENCONTRO LA TARJETA");
-        imprimir_matriz();
 
+      if((strcmp(ptrUID,"E3 FC B3 12") == 0) && comenzar_programa && finalizar_programa){ //si se ha escaneado la tarjeta de ejecutar programa
+        ejecutar_programa = true; //si ya indicaronn ejecutar programa
+        sincronizacion = 0;
+        comenzar_programa = false;
+        finalizar_programa = false;
       }
-    //limpiar sincronizacion cada vez que vuelva a iterar 
+
+      if(comenzar_programa && !finalizar_programa){ //Si se ha iniciado la escritura del programma y no se ha finalizado la misma comienza a almacenar en memoria
+        if (almacenar_instruccion(ptrUID)){
+          imprimir_matriz();
+        }
+      }
+
+      if((strcmp(ptrUID, "A3 CE 89 94") == 0) && !comenzar_programa){ //Si el UID es comenzar programa y esta tarjeta no ha sido escaneada previamente indica que ya comenzo la escritura de instrucciones en el programa
+        comenzar_programa = true;
+      }
+
+      if((strcmp(ptrUID,"43 26 C4 12") == 0) && !finalizar_programa && comenzar_programa){ //Si el UID es finalizar programa y esta tarjeta no ha sido escaneada previamente indica que ya finalizo la escritura de instrucciones en el programa
+        finalizar_programa = true;
+      }
+
+      if((strcmp(ptrUID,"E3 F3 F0 94") == 0) && comenzar_programa && finalizar_programa){ //Si el UID es volver a comenzar y ya se escaneo la tarjeta de comienzo y finalizacion del programa quiere decir que el usuario desea una iteracion adicional de este
+        volver_a_comenzar++; //indica el numero de iteraciones a realizar
+      }
     }
-      
-    delay(1000);
-  
   }
 
-
-
+  while(volver_a_comenzar >= 0){
+    
+    Serial.print("ITERACION NRO: ");
+    Serial.println(volver_a_comenzar);
+    volver_a_comenzar--;
   }
+
+  delay(1000);
+}
 /*------------------------------------------*/
 
 
