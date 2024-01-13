@@ -51,13 +51,40 @@ bool comenzar_programa = false;
 bool finalizar_programa = false;
 int volver_a_comenzar = 0;
 bool ejecutar_programa = false;
+unsigned long *tiempos_eje_bloques = NULL;
+
 /*-------------------------------*/
 
 
 
 /*--------------------------------------------FUNCIONALIDADES---------------------------------------*/
 
+unsigned long *crear_arreglo_tiempos_ejecucion_bloques(){
+  unsigned long *nuevos_tiempos_eje_bloques = NULL;
 
+  if ((nuevos_tiempos_eje_bloques = (unsigned long *) malloc(sizeof (unsigned long) * 5)) == NULL){
+		Serial.println("nuevaFunc: error en el malloc\n");
+		exit(1);
+  }
+
+return nuevos_tiempos_eje_bloques;}
+
+void inicializar_arreglo_tiempos_ejecucion_bloques(){ //inicializa el arreglo que contiene los tiempos de ejecuion de cada bloque
+
+  for(int i = 0; i < 5; i++){
+    tiempos_eje_bloques[i] = 0;
+  }
+}
+
+void establecer_tiempos_eje_arreglo_tiempos_bloques(unsigned long tiempo_bloque_0,unsigned long tiempo_bloque_1,unsigned long tiempo_bloque_2, unsigned long tiempo_bloque_3, unsigned long tiempo_bloque_4){
+
+  tiempos_eje_bloques[0] = tiempo_bloque_0;
+  tiempos_eje_bloques[1] = tiempo_bloque_1;
+  tiempos_eje_bloques[2] = tiempo_bloque_2;
+  tiempos_eje_bloques[3] = tiempo_bloque_3;
+  tiempos_eje_bloques[4] = tiempo_bloque_4;
+
+}
 /*----CREA UNA NUEVA FUNCIONALIDAD PARTIENDO DE SU UID Y EL PUNTERO A LA FUNCION QUE CORRESPONDE----*/
 Funcionalidad *crear_nueva_funcionalidad(String UID, void (*Ptr)(), int type, Funcionalidad *next_func, unsigned long exec_time){
 	Funcionalidad *nueva_func = NULL;
@@ -136,14 +163,14 @@ void crear_arreglo_funcionalidades(){
   funcionalidades[16] = crear_nueva_funcionalidad("33 09 BB 94", &prueba, 4, NULL,5000); //EVITAR OBSTACULOS
   funcionalidades[17] = crear_nueva_funcionalidad("93 E2 20 95", &prueba, 4, NULL, 5000); //VOLVER POR LA IZQUIERDA
   funcionalidades[18] = crear_nueva_funcionalidad("23 DE 6C 94", &prueba, 5, NULL, 5000); //ENCENDER LUCES
-  funcionalidades[19] = crear_nueva_funcionalidad("13 7C 72 94", &prueba, 5, NULL, 5000); //APAGAR LUCES
+  funcionalidades[19] = crear_nueva_funcionalidad("13 7C 72 94", &prueba, 5, NULL, 3000); //APAGAR LUCES
   funcionalidades[20] = crear_nueva_funcionalidad("F3 A9 89 94", &prueba, 6, NULL, 5000); //ABRIR OJOS
   funcionalidades[21] = crear_nueva_funcionalidad("93 D3 80 94", &prueba, 6, NULL, 5000); //CERRAR OJOS
-  funcionalidades[22] = crear_nueva_funcionalidad("63 36 C6 94", &prueba, 6, NULL, 5000); //PESTANEAR
+  funcionalidades[22] = crear_nueva_funcionalidad("63 36 C6 94", &prueba, 6, NULL, 8000); //PESTANEAR
   funcionalidades[23] = crear_nueva_funcionalidad("D3 12 74 94", &prueba, 7, NULL,5000); //GRABAR AUDIO
   funcionalidades[24] = crear_nueva_funcionalidad("53 2D 89 94", &prueba,7, NULL,5000); //REPRODUCIR AUDIO
   funcionalidades[25] = crear_nueva_funcionalidad("A3 7A CB 94", &emitir_sonido, 7, NULL,15000); //EMITIR SONIDO
-  funcionalidades[26] = crear_nueva_funcionalidad("E3 F7 A7 12", &pausar_sonido, 7, NULL,5000); //SILENCIAR
+  funcionalidades[26] = crear_nueva_funcionalidad("E3 F7 A7 12", &pausar_sonido, 7, NULL,15000); //SILENCIAR
 
   /*-----------------------COLORES--------------------*/
   /*funcionalidades[27] = nuevaFuncionalidad("", &prueba);
@@ -261,7 +288,6 @@ void imprimir_funcionalidades(){
 void introducir_inst_columna_memoria(int indice_func, int colum, int dim){
 bool almacenado = false;
 
-
   Serial.print("Dimension:");
   Serial.println(dim,1);
       for( int j = 0 ; j<8 ; j++){
@@ -273,12 +299,9 @@ bool almacenado = false;
             return;
           } 
     }   
-  
-  
 
   if(!almacenado){
     Serial.println("NO HAY ESPACIO PARA ALMACENAR OTRA INSTRUCCION DE ESE TIPO");
-
   }
 
 
@@ -348,6 +371,60 @@ bool verificar_bloque_instrucciones_vacio(int bloque){ //devuelve 1 si se encuen
     } 
 }
 
+unsigned long tiempo_duracion_bloque_instrucciones(int bloque){ //busca la columna que que dure mas tiempo en ejecutarse. Ese es el tiempo que debe demorar el bloque de instrucciones completo
+  
+  unsigned long duracion = 0, duracion_max = 0;
+
+  for(int i = 0 ; i < 5; i++){
+    duracion = 0;
+    for(int j = 0; j < 8; j++){
+      if(memoria_instrucciones[bloque][j][i] != 0){
+        Serial.print("La celda ");
+        Serial.print("Bloque->");
+        Serial.print(bloque);
+        Serial.print(", columna->");
+        Serial.print(i);
+        Serial.print(", fila->");
+        Serial.print(j);
+        Serial.println(" NO ESTA VACIA");
+        Serial.print("Tiempo a acumular: ");
+        Serial.println(funcionalidades[memoria_instrucciones[bloque][j][i]]->exec_time);
+        duracion += funcionalidades[memoria_instrucciones[bloque][j][i]]->exec_time;
+      }else{
+        break;
+      }
+    }
+    
+
+    if(duracion != 0){
+       Serial.print("DURACION ACUMULADA: ");
+       Serial.println(duracion);
+
+       if(duracion > duracion_max){
+        duracion_max = duracion;
+        Serial.print("NUEVO MAYOR: ");
+        Serial.println(duracion_max);
+      }
+    }
+  }
+return duracion_max;}
+
+unsigned long duracion_programa(){
+  unsigned long tiempo_eje_programa = 0;
+
+  for(int i = 0; i<5 ; i++){
+      Serial.print("Tiempo del bloque ");
+      Serial.print(i);
+      Serial.print("------>");
+      Serial.println(tiempos_eje_bloques[i]);
+      tiempo_eje_programa += tiempos_eje_bloques[i];
+  }
+
+  Serial.print("TIEMPO DE EJECUCION DEL PROGRAMA: ");
+  Serial.println(tiempo_eje_programa);
+
+tiempo_eje_programa;}
+
 void escanear_instrucciones(){
 
    while(!ejecutar_programa){
@@ -355,7 +432,7 @@ void escanear_instrucciones(){
     if (nfc.tagPresent()){
 
       NfcTag tag = nfc.read();
-      tag.print();
+      //tag.print();
       String TagUID = tag.getUidString();
       char *ptrUID = NULL;
       ptrUID = new char[TagUID.length() + 1];
@@ -384,7 +461,12 @@ void escanear_instrucciones(){
       }
 
       if((strcmp(ptrUID,"E3 F3 F0 94") == 0) && comenzar_programa && finalizar_programa){ //Si el UID es volver a comenzar y ya se escaneo la tarjeta de comienzo y finalizacion del programa quiere decir que el usuario desea una iteracion adicional de este
+        Serial.println("SE DETECTO UN VOLVER A COMENZAR");
+        Serial.print("VOLVER A COMENZAR ANTES DEL INCREMENTO->");
+        Serial.println(volver_a_comenzar);
         volver_a_comenzar++; //indica el numero de iteraciones a realizar
+        Serial.print("VOLVER A COMENZAR LUEGO DEL INCREMENTO->");
+        Serial.println(volver_a_comenzar);
       }
     }
   }
@@ -393,8 +475,26 @@ void escanear_instrucciones(){
 /**---FUNCIONES QUE SE EJECUTAN N VECES----*/
 void loop(void) {
 
+  unsigned long tiempo_eje_programa = 0, tiempo_eje_bloque_0 = 0, tiempo_eje_bloque_1 = 0, tiempo_eje_bloque_2 = 0, tiempo_eje_bloque_3 = 0, tiempo_eje_bloque_4 = 0; 
   escanear_instrucciones();
 
+  if(tiempos_eje_bloques == NULL){
+    Serial.println("ESTA VACIO EL ARRELO DE TIEMPOS DE EJECIONES DE CADA BLQOUE");
+    tiempos_eje_bloques = crear_arreglo_tiempos_ejecucion_bloques();
+  }else{
+    Serial.println("NO ESTA VACIO AEL ARREGLO DE TIEMPOS DE EJECION DE CADA BLOQUE");
+  }
+  inicializar_arreglo_tiempos_ejecucion_bloques();
+  tiempo_eje_bloque_0 = tiempo_duracion_bloque_instrucciones(0);
+  tiempo_eje_bloque_1 = tiempo_duracion_bloque_instrucciones(1);
+  tiempo_eje_bloque_2 = tiempo_duracion_bloque_instrucciones(2);
+  tiempo_eje_bloque_3 = tiempo_duracion_bloque_instrucciones(3);
+  tiempo_eje_bloque_4 = tiempo_duracion_bloque_instrucciones(4);
+
+  establecer_tiempos_eje_arreglo_tiempos_bloques(tiempo_eje_bloque_0,tiempo_eje_bloque_1,tiempo_eje_bloque_2,tiempo_eje_bloque_3,tiempo_eje_bloque_4);
+  
+  tiempo_eje_programa = duracion_programa();
+  
   while(volver_a_comenzar >= 0){
 
     Serial.print("**************ITERACION NRO: ");
@@ -402,9 +502,11 @@ void loop(void) {
     Serial.println("**************");
     volver_a_comenzar--;
 
-    while(true){
+   /* while(tiempo_actual - ultimo_tiempo < tiempo_eje_programa){ //REPITE MIENTRAS EL TIEMPO TRANSCURRIDO SEA MENOR AL TIEMPO DE EJECUCION DEL PROGRAMA
       //Sacar la cuenta del tiempo maximo de todos los bloques que tegan instrucciones asi sabes cuanto tiene que durar la ejecucion de instrucciones cuando se llegue al tiempo corta el bucle
-    }
+
+    
+    }*/
   }
 
   volver_a_comenzar = 0;
