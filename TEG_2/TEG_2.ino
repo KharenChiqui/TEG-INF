@@ -423,7 +423,7 @@ unsigned long duracion_programa(){
   Serial.print("TIEMPO DE EJECUCION DEL PROGRAMA: ");
   Serial.println(tiempo_eje_programa);
 
-tiempo_eje_programa;}
+return tiempo_eje_programa;}
 
 void escanear_instrucciones(){
 
@@ -471,7 +471,8 @@ void escanear_instrucciones(){
     }
   }
 }
-
+ bool fin_eje = false;
+unsigned long tiempo_inicio_programa = 0, tiempo_fin_programa = 0;
 /**---FUNCIONES QUE SE EJECUTAN N VECES----*/
 void loop(void) {
 
@@ -494,19 +495,38 @@ void loop(void) {
   establecer_tiempos_eje_arreglo_tiempos_bloques(tiempo_eje_bloque_0,tiempo_eje_bloque_1,tiempo_eje_bloque_2,tiempo_eje_bloque_3,tiempo_eje_bloque_4);
   
   tiempo_eje_programa = duracion_programa();
-  
+  Serial.print("----------Tiempo eje programa->");
+  Serial.print(tiempo_eje_programa);
+
   while(volver_a_comenzar >= 0){
 
     Serial.print("**************ITERACION NRO: ");
     Serial.print(volver_a_comenzar);
     Serial.println("**************");
     volver_a_comenzar--;
+    Serial.print("Tiempo inicio programa 1->");
+      Serial.println(tiempo_inicio_programa);
+      Serial.print("Tiempo fin programa 1->");
+      Serial.println(tiempo_fin_programa);
+      Serial.print("Tiempo eje programa->");
+      Serial.println(tiempo_eje_programa);
 
-   /* while(tiempo_actual - ultimo_tiempo < tiempo_eje_programa){ //REPITE MIENTRAS EL TIEMPO TRANSCURRIDO SEA MENOR AL TIEMPO DE EJECUCION DEL PROGRAMA
+    tiempo_inicio_programa = millis();
+    tiempo_fin_programa = millis();
+  
+   while(tiempo_fin_programa - tiempo_inicio_programa <= tiempo_eje_programa){ //REPITE MIENTRAS EL TIEMPO TRANSCURRIDO SEA MENOR AL TIEMPO DE EJECUCION DEL PROGRAMA
       //Sacar la cuenta del tiempo maximo de todos los bloques que tegan instrucciones asi sabes cuanto tiene que durar la ejecucion de instrucciones cuando se llegue al tiempo corta el bucle
-
+      Serial.println("ENTRO EN CONDICIONAL");
+      
+      Serial.print("Tiempo Inicio programa->");
+      Serial.println(tiempo_inicio_programa);
+      Serial.println("HOLA MUNDO");
+      Serial.println("CHAO MUNDO");
+      Serial.print("Tiempo fin programa->");
+      Serial.println(tiempo_fin_programa);
+      tiempo_fin_programa = millis();
+    }
     
-    }*/
   }
 
   volver_a_comenzar = 0;
