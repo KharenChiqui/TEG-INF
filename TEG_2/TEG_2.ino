@@ -151,8 +151,8 @@ void crear_arreglo_funcionalidades(){
   funcionalidades[4] = crear_nueva_funcionalidad("A3 3E 72 94", &prueba, 0, NULL,0); //BORRAR
   funcionalidades[5] = crear_nueva_funcionalidad("E3 FC B3 12", &prueba, 2, NULL,0); //EJECUTAR PROGRAMA
   funcionalidades[6] = crear_nueva_funcionalidad("93 02 86 94", &prueba, 2, NULL,0); //PAUSAR
-  funcionalidades[7] = crear_nueva_funcionalidad("53 12 73 94", &prueba, 3, NULL,5000); //MOVER CABEZA A LA IZQUIERDA
-  funcionalidades[8] = crear_nueva_funcionalidad("F3 94 8B 94", &prueba, 3, NULL,5000); //MOVER CABEZA A LA DERECHA
+  funcionalidades[7] = crear_nueva_funcionalidad("53 12 73 94", &funcion_3, 3, NULL,5000); //MOVER CABEZA A LA IZQUIERDA
+  funcionalidades[8] = crear_nueva_funcionalidad("F3 94 8B 94", &funcion_4, 3, NULL,5000); //MOVER CABEZA A LA DERECHA
   funcionalidades[9] = crear_nueva_funcionalidad("33 22 B7 94", &prueba, 3, NULL,5000); //AGITAR COLA
   funcionalidades[10] = crear_nueva_funcionalidad("83 0E AA 12", &prueba, 4, NULL,5000); //AVANZAR
   funcionalidades[11] = crear_nueva_funcionalidad("13 45 8A 94", &prueba, 4, NULL, 5000); //GIRAR A LA DERECHA
@@ -163,8 +163,8 @@ void crear_arreglo_funcionalidades(){
   funcionalidades[16] = crear_nueva_funcionalidad("33 09 BB 94", &prueba, 4, NULL,5000); //EVITAR OBSTACULOS
   funcionalidades[17] = crear_nueva_funcionalidad("93 E2 20 95", &prueba, 4, NULL, 5000); //VOLVER POR LA IZQUIERDA
   funcionalidades[18] = crear_nueva_funcionalidad("23 DE 6C 94", &funcion_1, 5, NULL, 5000); //ENCENDER LUCES
-  funcionalidades[19] = crear_nueva_funcionalidad("13 7C 72 94", &prueba, 5, NULL, 3000); //APAGAR LUCES
-  funcionalidades[20] = crear_nueva_funcionalidad("F3 A9 89 94", &prueba, 6, NULL, 5000); //ABRIR OJOS
+  funcionalidades[19] = crear_nueva_funcionalidad("13 7C 72 94", &funcion_2, 5, NULL, 3000); //APAGAR LUCES
+  funcionalidades[20] = crear_nueva_funcionalidad("F3 A9 89 94", &funcion_2, 6, NULL, 5000); //ABRIR OJOS
   funcionalidades[21] = crear_nueva_funcionalidad("93 D3 80 94", &prueba, 6, NULL, 5000); //CERRAR OJOS
   funcionalidades[22] = crear_nueva_funcionalidad("63 36 C6 94", &prueba, 6, NULL, 8000); //PESTANEAR
   funcionalidades[23] = crear_nueva_funcionalidad("D3 12 74 94", &prueba, 7, NULL,5000); //GRABAR AUDIO
@@ -461,20 +461,41 @@ void funcion_1(bool fin_eje_inst){
 void funcion_2(bool fin_eje_inst){
 
   if(!fin_eje_inst){
-    digitalWrite(10, HIGH);
-    digitalWrite(8, HIGH);
+    digitalWrite(5, HIGH);
   }else{
-      digitalWrite(10, LOW);
-      digitalWrite(8, LOW);
+     digitalWrite(5, LOW);
   }
 
 }
 
+void funcion_3(bool fin_eje_inst){
+
+  if(!fin_eje_inst){
+    digitalWrite(3, HIGH);
+  }else{
+     digitalWrite(3, LOW);
+  }
+
+}
+
+void funcion_4(bool fin_eje_inst){
+
+  if(!fin_eje_inst){
+    digitalWrite(2, HIGH);
+  }else{
+     digitalWrite(2, LOW);
+  }
+
+}
+
+
+
 void ejecutar_columna_instrucciones(int *bloque, int columna, int *fila, unsigned long *tiempo_inicio_bloque, unsigned long *tiempo_fin_bloque, unsigned long *tiempo_eje_bloque, bool *ejecutada, unsigned long *tiempo_inicio_col,unsigned long *tiempo_fin_col, bool *tiempo_exed_col, unsigned long *tiempo_inicio_inst_col, unsigned long *tiempo_inst_col){
 
   void (*Funcionalidad)(bool) = NULL;
-  
-  Serial.println("Comienzo");
+  Serial.print("/*-----COLUMNA ");
+  Serial.print(columna);
+  Serial.println("-----------*/");
   Serial.print("Tiempo inicio: ");
   Serial.println(*tiempo_inicio_bloque);
 
@@ -493,13 +514,22 @@ void ejecutar_columna_instrucciones(int *bloque, int columna, int *fila, unsigne
       Serial.println(*tiempo_inicio_inst_col);
         Serial.print("Tiempo actual transucrrio->");
       Serial.println(*tiempo_fin_col);
+
+    
+
+
       if(!(*tiempo_exed_col)){
-        *tiempo_inst_col = (funcionalidades[memoria_instrucciones[*bloque][*fila][columna]]->exec_time);
+          Serial.print("Fila->");
+      Serial.println(*fila);
+        *tiempo_inst_col = funcionalidades[memoria_instrucciones[*bloque][*fila][columna]]->exec_time;
         Serial.print("Tiempo que dura la instruccion->");
         Serial.println(*tiempo_inst_col);
-        if( ((*tiempo_fin_col) - (*tiempo_inicio_inst_col) + 250 >= tiempo_inst_col)  && ((*tiempo_fin_col) - (*tiempo_inicio_col) <= *tiempo_eje_bloque) ){
+        Serial.print("Tiempo ejecutado de la columna");
+        Serial.println((*tiempo_fin_col) - (*tiempo_inicio_col));
+        if( ((*tiempo_fin_col) - (*tiempo_inicio_inst_col) + 500 >= *tiempo_inst_col)  && ((*tiempo_fin_col) - (*tiempo_inicio_col) + 500 <= *tiempo_eje_bloque) ){
           Serial.println("ENCCONTRO UN EXCEDENTE");
-          *tiempo_inst_col = *tiempo_eje_bloque - (*tiempo_fin_col - *tiempo_inicio_col);
+          *(tiempo_inst_col) += *tiempo_eje_bloque - (*tiempo_fin_col - *tiempo_inicio_col);
+          //Serial.prin
           *tiempo_exed_col = true;
         }
       }
@@ -507,12 +537,12 @@ void ejecutar_columna_instrucciones(int *bloque, int columna, int *fila, unsigne
       
       //*tiempo_fin_col = millis();
       // Serial.print("Tiempo actual transucrrido 222->");
-      Serial.println(*tiempo_fin_col);
-      if((*tiempo_fin_col) - (*tiempo_inicio_inst_col)+ 250 >= *tiempo_inst_col){ //Verifica si el tiempo transcurrido desde que comenzo a ejecutarse la instruccion es igual al establecido para su ejecucion
+      
+      if((*tiempo_fin_col) - (*tiempo_inicio_inst_col)+ 500 >= *tiempo_inst_col){ //Verifica si el tiempo transcurrido desde que comenzo a ejecutarse la instruccion es igual al establecido para su ejecucion
         Serial.println("SE CUMPLIO EL TIEMPO DE LA INSTRUCCION DESACTIVALA");
         Funcionalidad = (funcionalidades[memoria_instrucciones[*bloque][*fila][columna]])->Ptr_func;
         Funcionalidad(true);
-        *fila++;// Incrementa la fila que esta recorriendo
+        (*fila)++;// Incrementa la fila que esta recorriendo
         *ejecutada = false; //Indica que  esta fila termino de ejecutarse
         *tiempo_exed_col = false;
       }
@@ -535,7 +565,7 @@ void loop(void) {
   bool tiempo_exed_col_0 = false,  tiempo_exed_col_1 = false, tiempo_exed_col_2 = false ,tiempo_exed_col_3 = false ,tiempo_exed_col_4 = false;
   unsigned long tiempo_eje_inst = 0;
 
-  int bloque = 0, fila = 0;
+  int bloque = 0, fila_col_0 = 0, fila_col_1 = 0, fila_col_2 = 0, fila_col_3 = 0, fila_col_4 = 0;
   bool inicio_bloque = false, ejecutada_0 = false, ejecutada_1 = false, ejecutada_2 = false, ejecutada_3 = false, ejecutada_4 = false ;
 
   escanear_instrucciones();
@@ -568,20 +598,22 @@ void loop(void) {
     tiempo_fin_programa = millis();
 
    while(tiempo_fin_programa - tiempo_inicio_programa <= tiempo_eje_programa){ //REPITE MIENTRAS EL TIEMPO TRANSCURRIDO SEA MENOR AL TIEMPO DE EJECUCION DEL PROGRAMA
-      //Sacar la cuenta del tiempo maximo de todos los bloques que tegan instrucciones asi sabes cuanto tiene que durar la ejecucion de instrucciones cuando se llegue al tiempo corta el bucle
-      
+    
       if (!inicio_bloque){
         inicio_bloque = true;
         tiempo_fin_bloque = millis();
         tiempo_inicio_bloque = millis();
         tiempo_inicio_col_0 = tiempo_inicio_bloque;
-        fila = 0;
+        tiempo_inicio_col_2 = tiempo_inicio_bloque;
+        fila_col_0 = 0;
+        fila_col_1 = 0;
+        fila_col_2 = 0;
+        fila_col_3 = 0;
+        fila_col_4 = 0;
       }
 
       if(bloque == 0){
-        Serial.print("ENTRO EN BLOQUE 0-->");
         tiempo_eje_bloque = tiempo_eje_bloque_0;
-        Serial.println(tiempo_eje_bloque);
       }
       if(bloque == 1){
         tiempo_eje_bloque = tiempo_eje_bloque_1;
@@ -598,15 +630,16 @@ void loop(void) {
 
       Serial.print("BLoque a Ejecutar->");
       Serial.println(bloque);
-      Serial.print("Fila a Ejecutar->");
-      Serial.println(fila);
-        if(memoria_instrucciones[bloque][0][2] != 0){
-          ejecutar_columna_instrucciones(&bloque,2, &fila, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_0, &tiempo_inicio_col_0, &tiempo_fin_col_0, &tiempo_exed_col_0, &tiempo_inicio_inst_col_0, &tiempo_eje_inst);
-        }   
+  
+      if(memoria_instrucciones[bloque][0][0] != 0){
+          ejecutar_columna_instrucciones(&bloque,0, &fila_col_0, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_0, &tiempo_inicio_col_0, &tiempo_fin_col_0, &tiempo_exed_col_0, &tiempo_inicio_inst_col_0, &tiempo_eje_inst);
+      }   
       
-     /* ejecutar_columna_instrucciones(&bloque,1, &fila, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_1, &tiempo_inicio_col_1);
-      ejecutar_columna_instrucciones(&bloque,2, &fila, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_2, &tiempo_inicio_col_2);
-      ejecutar_columna_instrucciones(&bloque,3, &fila, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_3, &tiempo_inicio_col_3);
+     // ejecutar_columna_instrucciones(&bloque,1, &fila, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_1, &tiempo_inicio_col_1);
+      if(memoria_instrucciones[bloque][0][2] != 0){
+         ejecutar_columna_instrucciones(&bloque,2, &fila_col_2, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_2, &tiempo_inicio_col_2, &tiempo_fin_col_2, &tiempo_exed_col_2,&tiempo_inicio_inst_col_2, &tiempo_eje_inst);
+      }
+      /*ejecutar_columna_instrucciones(&bloque,3, &fila, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_3, &tiempo_inicio_col_3);
       ejecutar_columna_instrucciones(&bloque,4, &fila, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_4, &tiempo_inicio_col_4);*/
 
       tiempo_fin_bloque = millis();
@@ -617,6 +650,7 @@ void loop(void) {
         Serial.println(tiempo_eje_bloque);
         inicio_bloque = false;
         bloque++;
+  
       }
     } 
   }
