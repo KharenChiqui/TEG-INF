@@ -501,7 +501,10 @@ void ejecutar_columna_instrucciones(int *bloque, int columna, int *fila, unsigne
 
   if((*tiempo_fin_bloque) - (*tiempo_inicio_bloque) >= 0){//Si el tiempo transcurrido es mayor a 0 segundos
 
-    if(!(*ejecutada)){ //Verica si no se ha ejecutado la instruccion de esta fila y la comienza a ejecutar
+  if(memoria_instrucciones[*bloque][*fila][columna] != 0){
+
+  
+    if(!(*ejecutada) ){ //Verica si no se ha ejecutado la instruccion de esta fila y la comienza a ejecutar
       Funcionalidad = (funcionalidades[memoria_instrucciones[*bloque][*fila][columna]])->Ptr_func;
       Funcionalidad(false);
       *ejecutada = true; //Indica que ya esta fila comenzo a ejecutarse
@@ -515,9 +518,6 @@ void ejecutar_columna_instrucciones(int *bloque, int columna, int *fila, unsigne
         Serial.print("Tiempo actual transucrrio->");
       Serial.println(*tiempo_fin_col);
 
-    
-
-
       if(!(*tiempo_exed_col)){
           Serial.print("Fila->");
       Serial.println(*fila);
@@ -526,7 +526,7 @@ void ejecutar_columna_instrucciones(int *bloque, int columna, int *fila, unsigne
         Serial.println(*tiempo_inst_col);
         Serial.print("Tiempo ejecutado de la columna");
         Serial.println((*tiempo_fin_col) - (*tiempo_inicio_col));
-        if( ((*tiempo_fin_col) - (*tiempo_inicio_inst_col) + 500 >= *tiempo_inst_col)  && ((*tiempo_fin_col) - (*tiempo_inicio_col) + 500 <= *tiempo_eje_bloque) ){
+        if( ((*tiempo_fin_col) - (*tiempo_inicio_inst_col)  >= *tiempo_inst_col)  && ((*tiempo_fin_col) - (*tiempo_inicio_col)  <= *tiempo_eje_bloque) ){
           Serial.println("ENCCONTRO UN EXCEDENTE");
           *(tiempo_inst_col) += *tiempo_eje_bloque - (*tiempo_fin_col - *tiempo_inicio_col);
           //Serial.prin
@@ -538,7 +538,7 @@ void ejecutar_columna_instrucciones(int *bloque, int columna, int *fila, unsigne
       //*tiempo_fin_col = millis();
       // Serial.print("Tiempo actual transucrrido 222->");
       
-      if((*tiempo_fin_col) - (*tiempo_inicio_inst_col)+ 500 >= *tiempo_inst_col){ //Verifica si el tiempo transcurrido desde que comenzo a ejecutarse la instruccion es igual al establecido para su ejecucion
+      if(((*tiempo_fin_col) - (*tiempo_inicio_inst_col)  >= *tiempo_inst_col)){ //Verifica si el tiempo transcurrido desde que comenzo a ejecutarse la instruccion es igual al establecido para su ejecucion
         Serial.println("SE CUMPLIO EL TIEMPO DE LA INSTRUCCION DESACTIVALA");
         Funcionalidad = (funcionalidades[memoria_instrucciones[*bloque][*fila][columna]])->Ptr_func;
         Funcionalidad(true);
@@ -547,6 +547,7 @@ void ejecutar_columna_instrucciones(int *bloque, int columna, int *fila, unsigne
         *tiempo_exed_col = false;
       }
     }
+  }
   }
 }
 
@@ -566,7 +567,7 @@ void loop(void) {
   unsigned long tiempo_eje_inst = 0;
 
   int bloque = 0, fila_col_0 = 0, fila_col_1 = 0, fila_col_2 = 0, fila_col_3 = 0, fila_col_4 = 0;
-  bool inicio_bloque = false, ejecutada_0 = false, ejecutada_1 = false, ejecutada_2 = false, ejecutada_3 = false, ejecutada_4 = false ;
+  bool inicio_bloque = false, ejecutada_0 = false, ejecutada_1 = false, ejecutada_2 = false, ejecutada_3 = false, ejecutada_4 = false, fin_programa = false, fin_bloque = false;
 
   escanear_instrucciones();
 
@@ -597,7 +598,7 @@ void loop(void) {
     tiempo_inicio_programa = millis();
     tiempo_fin_programa = millis();
 
-   while(tiempo_fin_programa - tiempo_inicio_programa <= tiempo_eje_programa){ //REPITE MIENTRAS EL TIEMPO TRANSCURRIDO SEA MENOR AL TIEMPO DE EJECUCION DEL PROGRAMA
+   while(!fin_programa){ //REPITE MIENTRAS EL TIEMPO TRANSCURRIDO SEA MENOR AL TIEMPO DE EJECUCION DEL PROGRAMA
     
       if (!inicio_bloque){
         inicio_bloque = true;
@@ -610,6 +611,7 @@ void loop(void) {
         fila_col_2 = 0;
         fila_col_3 = 0;
         fila_col_4 = 0;
+        fin_bloque = false;
       }
 
       if(bloque == 0){
@@ -645,12 +647,23 @@ void loop(void) {
       tiempo_fin_bloque = millis();
       tiempo_fin_programa = millis();
 
-      if(tiempo_fin_bloque - tiempo_inicio_bloque >= tiempo_eje_bloque){
-        Serial.print("LLEGO EL FIN DE BLOQUE TIEMPO-->");
+      if(tiempo_fin_bloque - tiempo_inicio_bloque >= tiempo_eje_bloque){ //SI LLEGO EL TIEMPO DE FINALIAR UN BLOQUE DE INSTRUCCIONES
+        Serial.print("LLEGO EL TIEMPO DE FIN DE BLOQUE -->");
         Serial.println(tiempo_eje_bloque);
-        inicio_bloque = false;
-        bloque++;
-  
+         if(!ejecutada_0 && !ejecutada_1 && !ejecutada_2 && !ejecutada_3 && !ejecutada_4){ //Revisa si todas las instrucciones fueron desactivadas de cada columna
+          Serial.println("Todas las instrucciones han sido desactivadas finaliza el programa");
+          inicio_bloque = false;
+          bloque++;
+          fin_bloque = true;
+        }
+      }
+
+      if(tiempo_fin_programa - tiempo_inicio_programa >= tiempo_eje_programa){ //si ya llego el tiempo de terminar el programa
+        Serial.println("Llego el tiempo que dura el programa");
+        if(fin_bloque){ //Revisa si todas las instrucciones fueron desactivadas de cada columna
+          Serial.println("Todas las instrucciones han sido desactivadas finaliza el programa");
+          fin_programa = true; //Si todas fueron ejecutadas y se desactivaron indica el fin del programa
+        }
       }
     } 
   }
@@ -659,7 +672,6 @@ void loop(void) {
   inicializar_memoria();
   ejecutar_programa = false;
 
-  delay(1000);
 }
 /*------------------------------------------*/
 
