@@ -291,7 +291,7 @@ void crear_arreglo_funcionalidades(){
 /*----------------------------------------------------------------------------------------------*/
 void encender_luces(bool fin_eje_inst){
 
-  Serial.println("ENTRO A ENCENDER LAS LUCES");
+ 
   if(!fin_eje_inst){
 
     Serial.print("LUCES--------------->");
@@ -698,13 +698,9 @@ return tiempo_eje_programa;
 
 void escanear_instrucciones(){
 
-  Serial.println("ENTRA EN ESCANEAR");
-
    while(!ejecutar_programa){
-    Serial.println("Ejecutar programa is false");
     if (nfc.tagPresent()){
       NfcTag tag = nfc.read();
-      Serial.println("Detecto una TAG");
       //tag.print();
       String TagUID = tag.getUidString();
       char *ptrUID = NULL;
@@ -791,9 +787,6 @@ void ejecutar_columna_instrucciones(int *bloque, int columna, int *fila, unsigne
   Serial.println("/*-----------------------INICIO EJECUCION----------------------------*/");
   Serial.print("COLUMNA: ");
   Serial.println(columna);
-  Serial.print("TIEMPO DE INICIO: ");
-  Serial.println(*tiempo_inicio_bloque);
-  
 
   if((*tiempo_fin_bloque) - (*tiempo_inicio_bloque) >= 0){//Si el tiempo transcurrido es mayor a 0 segundos
 
@@ -807,58 +800,54 @@ void ejecutar_columna_instrucciones(int *bloque, int columna, int *fila, unsigne
       }else{
         *tiempo_inicio_inst_col = millis(); //almacena el tiempo en el que comenzo a ejecutarse la instruccion actual
       }
-      
-      Serial.print("TIEMPO PRIMERA VEZ EJEC INSTRUCCION: ");
-      Serial.println(*tiempo_inicio_inst_col);
+
     }else{ //si ya fue ejecutada verifica si es momento de finalizarla
       *tiempo_fin_col = millis();
-      Serial.print("TIEMPO DE INICIO INSTRUCCION: ");
-      Serial.println(*tiempo_inicio_inst_col);
 
       if(!(*tiempo_exed_col)){
         Serial.print("Fila: ");
         Serial.println(*fila);
         *tiempo_inst_col = funcionalidades[memoria_instrucciones[*bloque][*fila][columna]]->exec_time;
-        Serial.print("TIEMPO QUE DURA LA INSTRUCCION: ");
-        Serial.println(*tiempo_inst_col);
-        Serial.print("TIEMPO QUE SE HA EJECUTADO DE LA COLUMNA HASTA EL MOMENTO> ");
-        Serial.println((*tiempo_fin_col) - (*tiempo_inicio_col));
-
         //SI YA SE CUMPLIO EL TIEMPO DE LA INSTRUCCION Y ADEMAS A ESE BLOQUE AUN LE QUEDAN INSTRUCCIONES POR EJECUTAR Y EL TIEMPO DE EJECUCION DE LA COLUMNA LLEGO A SU FIN
         if((*tiempo_eje_col) == 0){
           *tiempo_eje_col = tiempo_eje_columna_instrucciones(*bloque, columna);
-          Serial.print("/*-----------TIEMPO DE EJECUCION COMLUNA------------");
-          Serial.println(*tiempo_eje_col);
         }
         
-        //SI VES QUE EL TIEMPO DE LA INSTRUCCION YA SE CUMPLIO //SI VES QUE EL TIEMPO QUE DURA LA COLUMNNA ES MENOR AL TIEMPO DE EJECUCION DE ESE BLOQUE, ES DECIR QUE EL PROGRAMA DURA MAS // SI VES QUE YA LA COLUMNA TERMINO DE EJECUTARSE
-       // Serial.println();
-        //Serial.println();
-       // Serial.println("/------PRUEBAS DE TIEMPO-----------*/");
-       // Serial.print("TIEMPO QUE HA TRANSCURRIDO DE LA INSTRUCCION->");
-       // Serial.println((*tiempo_fin_col) - (*tiempo_inicio_inst_col));
-        Serial.print("TIEMPO QUE HA TRANSCURRIDO COLUMNA COMPARAR->");
-        Serial.println((*tiempo_fin_col) - (*tiempo_inicio_col));
-        Serial.println("/------------------------------*/");
-        Serial.println();
-        Serial.println();
-      
-
         if( ((*tiempo_fin_col) - (*tiempo_inicio_inst_col)  >= *tiempo_inst_col)  && ((*tiempo_fin_col) - (*tiempo_inicio_col)  <= *tiempo_eje_bloque) && ((*tiempo_fin_col) - (*tiempo_inicio_col)  >= (*tiempo_eje_col))){
-          Serial.println("ENCONTRO UN TIEMPO EXCEDENTE");
+          Serial.println("ENCONTRO UN TIEMPO EXCEDENTEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
           //*(tiempo_inst_col) += *tiempo_eje_bloque - (*tiempo_fin_col - *tiempo_inicio_col);
+          Serial.print("Tiempo transurrido de la instruccion-->");
+          Serial.println((*tiempo_fin_col) - (*tiempo_inicio_inst_col));
           *tiempo_inst_col += *tiempo_eje_bloque - (*tiempo_fin_col - *tiempo_inicio_col);
-          Serial.print("SE ESTABLECIO EL NUEVO TIEMPO DE LA INSTRUCCION CONFORME AL EXCEDENTE->");
+          Serial.print("Tiempo excedente establecido-->");
+          
           Serial.println(*tiempo_inst_col);
           *tiempo_exed_col = true;
         }
       }
-      Serial.print("TIEMPO TRASCURRRIDO DE LA INSTRUCCION ANTES DE DESACTIVARLA-->");
-      Serial.println((*tiempo_fin_col) - (*tiempo_inicio_inst_col));
-      Serial.println();
-      Serial.println();
+
+      if((*tiempo_fin_col) - (*tiempo_inicio_inst_col)  >= *tiempo_inst_col){
+          Serial.println("SE CUMPLE CONIDCION 1");
+          Serial.print((*tiempo_fin_col) - (*tiempo_inicio_inst_col) );
+          Serial.print("----");
+          Serial.println(*tiempo_inst_col );
+
+          
+      }
+
+          if(((*tiempo_fin_col) - (*tiempo_inicio_col)  >= (*tiempo_eje_bloque))){
+          Serial.println("SE CUMPLE CONIDCION 2");
+          Serial.print((*tiempo_fin_col) - (*tiempo_inicio_col) );
+          Serial.print("----");
+          Serial.println((*tiempo_eje_bloque) );
+
+      }
+
+      Serial.print("Tiempo excedente establecido22222222222222222222222-->");
+          Serial.println(*tiempo_inst_col);
+
+
       if(((*tiempo_fin_col) - (*tiempo_inicio_inst_col)  >= *tiempo_inst_col) || ((*tiempo_fin_col) - (*tiempo_inicio_col)  >= (*tiempo_eje_bloque)) ){ //Verifica si el tiempo transcurrido desde que comenzo a ejecutarse la instruccion es igual al establecido para su ejecucion o si el tiempo para la ejecucion de la columna ya finalizo y por lo tanto la ejecucon de la instruccion
-        Serial.println("SE CUMPLIO EL TIEMPO DE LA INSTRUCCION DESACTIVALA");
         Funcionalidad = (funcionalidades[memoria_instrucciones[*bloque][*fila][columna]])->Ptr_func;
         Funcionalidad(true);
         (*fila)++;// Incrementa la fila que esta recorriendo
@@ -868,9 +857,6 @@ void ejecutar_columna_instrucciones(int *bloque, int columna, int *fila, unsigne
     }
     
   }
-
- Serial.println("/*-----------------------FIN EJECUCION----------------------------*/");
-  Serial.println();
 }
 
 
@@ -886,7 +872,7 @@ void loop(void) {
   unsigned long tiempo_fin_col_0 = 0, tiempo_fin_col_1 = 0, tiempo_fin_col_2 = 0,tiempo_fin_col_3 = 0,tiempo_fin_col_4 = 0; 
   unsigned long tiempo_inicio_inst_col_0 = 0, tiempo_inicio_inst_col_1 = 0, tiempo_inicio_inst_col_2 = 0,tiempo_inicio_inst_col_3 = 0,tiempo_inicio_inst_col_4 = 0; 
   bool tiempo_exed_col_0 = false,  tiempo_exed_col_1 = false, tiempo_exed_col_2 = false ,tiempo_exed_col_3 = false ,tiempo_exed_col_4 = false;
-  unsigned long tiempo_eje_inst = 0, tiempo_eje_colum_0 = 0, tiempo_eje_colum_1 = 0, tiempo_eje_colum_2 = 0, tiempo_eje_colum_3 = 0, tiempo_eje_colum_4 = 0;
+  unsigned long tiempo_eje_inst_0 = 0, tiempo_eje_inst_1 = 0, tiempo_eje_inst_2 = 0, tiempo_eje_inst_3 = 0, tiempo_eje_inst_4 = 0, tiempo_eje_colum_0 = 0, tiempo_eje_colum_1 = 0, tiempo_eje_colum_2 = 0, tiempo_eje_colum_3 = 0, tiempo_eje_colum_4 = 0;
 
   int bloque = 0, fila_col_0 = 0, fila_col_1 = 0, fila_col_2 = 0, fila_col_3 = 0, fila_col_4 = 0;
   bool inicio_bloque = false, ejecutada_0 = false, ejecutada_1 = false, ejecutada_2 = false, ejecutada_3 = false, ejecutada_4 = false, fin_programa = false, fin_bloque = false;
@@ -976,16 +962,22 @@ void loop(void) {
       Serial.println(bloque);*/
   
       if(memoria_instrucciones[bloque][0][0] != 0){
-          ejecutar_columna_instrucciones(&bloque,0, &fila_col_0, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_0, &tiempo_inicio_col_0, &tiempo_fin_col_0, &tiempo_exed_col_0, &tiempo_inicio_inst_col_0, &tiempo_eje_inst, &tiempo_eje_colum_0);
+          ejecutar_columna_instrucciones(&bloque,0, &fila_col_0, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_0, &tiempo_inicio_col_0, &tiempo_fin_col_0, &tiempo_exed_col_0, &tiempo_inicio_inst_col_0, &tiempo_eje_inst_0, &tiempo_eje_colum_0);
       }   
       
      // ejecutar_columna_instrucciones(&bloque,1, &fila, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_1, &tiempo_inicio_col_1);
       if(memoria_instrucciones[bloque][0][2] != 0){
-         ejecutar_columna_instrucciones(&bloque,2, &fila_col_2, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_2, &tiempo_inicio_col_2, &tiempo_fin_col_2, &tiempo_exed_col_2,&tiempo_inicio_inst_col_2, &tiempo_eje_inst, &tiempo_eje_colum_2);
+         ejecutar_columna_instrucciones(&bloque,2, &fila_col_2, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_2, &tiempo_inicio_col_2, &tiempo_fin_col_2, &tiempo_exed_col_2,&tiempo_inicio_inst_col_2, &tiempo_eje_inst_2, &tiempo_eje_colum_2);
+         Serial.print("Fuera del llamado excedente columna 2-->");
+         Serial.println(tiempo_eje_inst_2);
+
       }
 
       if(memoria_instrucciones[bloque][0][4] != 0){
-         ejecutar_columna_instrucciones(&bloque,4, &fila_col_4, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_4, &tiempo_inicio_col_4, &tiempo_fin_col_4, &tiempo_exed_col_4,&tiempo_inicio_inst_col_4, &tiempo_eje_inst, &tiempo_eje_colum_4);
+         ejecutar_columna_instrucciones(&bloque,4, &fila_col_4, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_4, &tiempo_inicio_col_4, &tiempo_fin_col_4, &tiempo_exed_col_4,&tiempo_inicio_inst_col_4, &tiempo_eje_inst_4, &tiempo_eje_colum_4);
+          Serial.print("Fuera del llamado excedente columna 4-->");
+          Serial.println(tiempo_eje_inst_4);
+
       }
       /*ejecutar_columna_instrucciones(&bloque,3, &fila, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_3, &tiempo_inicio_col_3);
       ejecutar_columna_instrucciones(&bloque,4, &fila, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_4, &tiempo_inicio_col_4);*/
