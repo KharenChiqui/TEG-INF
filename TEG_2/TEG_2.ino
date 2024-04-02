@@ -73,40 +73,48 @@ Color **colores = NULL;
 int luces = 0;
 int color_reg = 0;
 int *memoria_colores_luces = NULL;
-
+int micro = 0;
+unsigned long tiempo_inicio_programa = 0, tiempo_fin_programa = 0;
 /*-------------------------------*/
+
+
 
 
 
 /*--------------------------------------------FUNCIONALIDADES---------------------------------------*/
 
+/*-----INICIALIZA LA MEMORIA QUE ALMACENA LOS INDICES DE LOS COLORES A UTILIZAR------*/
 void inicializar_memoria_colores_luces(){
   if ((memoria_colores_luces = (int) malloc(sizeof (int) * 8)) == NULL){
 		Serial.println("nuevaFunc: error en el malloc\n");
 		exit(1);
   }
 
-   
   for(int i = 0; i <= 8; i++){
     memoria_colores_luces[i] = 0;
   }
 
 }
+/*---------------------------------------------------------------------------------*/
+
+
+
+/*-----AGREGA LA POSICION QUE TIENE UN COLOR EN EL ARREGLO DE COLORES A LA MEMORIA DONDE ESTOS SE ALMACENAN PARA SER EJECUTADOS-------*/
 void agregar_color_luces_memoria(int pos_color){ //registra la posicion de memoria del color en el arreglo de colores
- 
-  Serial.println("EMPEZANDO A AGREGAR COLORES A MEMORIA");
   memoria_colores_luces[luces -1] = pos_color;
-  Serial.println("AGREGADO COLOR A MEMORIA");
-
+  
 }
+/*-------------------------------------------------------------------------------------------------------------------------------------*/
 
+
+
+/*-----ESTABLECE EL ARREGLO DE LOS COLORES DISPONIBLES EN LA APLICACION----*/
 void inicializar_colores_led(){
-  Serial.println("INICIALIZANDO COLORES LEDS");
   if ((colores = (Color **) malloc(sizeof (Color) * 8)) == NULL){
 		Serial.println("nuevaFunc: error en el malloc\n");
 		exit(1);
   }
-  Serial.println("INICIANDO");
+ 
   crear_nuevo_color(0,255,255,255); //blanco
   crear_nuevo_color(1,255,45,0); //naranja
   crear_nuevo_color(2,255,125,0); //amarillo
@@ -115,16 +123,15 @@ void inicializar_colores_led(){
   crear_nuevo_color(5,160,25,150); //morado
   crear_nuevo_color(6,0,255,0); //verde
   crear_nuevo_color(7,166,9,28); //rosa
-  Serial.println("INICIALIZADOS COLORES LEDS");
-
-
-   Serial.println("FINALIZANDO");
-
+ 
 }
+/*------------------------------------------------------------------------*/
 
+
+
+/*--------CREA UN NUEVO COLOR DADO SUS VALORES EN RGB------*/
 void crear_nuevo_color(int pos, uint8_t R, uint8_t G, uint8_t B ){
 
-   Serial.println("CREANDO NUEVO COLOR");
   if ((colores[pos] = (Color *) malloc(sizeof (Color))) == NULL){
 		Serial.println("nuevaFunc: error en el malloc\n");
 		exit(1);
@@ -133,36 +140,12 @@ void crear_nuevo_color(int pos, uint8_t R, uint8_t G, uint8_t B ){
   colores[pos]->G = G;
   colores[pos]->B = B;
 
-   Serial.println("CREADOO NUEVO COLOR");
 }
+/*----------------------------------------------------------*/
 
-unsigned long *crear_arreglo_tiempos_ejecucion_columnas(){
-  unsigned long *nuevos_tiempos_eje_columnas = NULL;
 
-  if ((nuevos_tiempos_eje_columnas = (unsigned long *) malloc(sizeof (unsigned long) * 5)) == NULL){
-		Serial.println("nuevaFunc: error en el malloc\n");
-		exit(1);
-  }
 
-return nuevos_tiempos_eje_columnas;}
-
-void inicializar_arreglo_tiempos_ejecucion_columnas(){ //inicializa el arreglo que contiene los tiempos de ejecuion de cada bloque
-
-  for(int i = 0; i < 5; i++){
-    tiempos_eje_columnas[i] = 0;
-  }
-}
-
-void establecer_tiempos_eje_arreglo_tiempos_columnas(unsigned long tiempo_eje_colum_0,unsigned long tiempo_eje_colum_1,unsigned long tiempo_eje_colum_2, unsigned long tiempo_eje_colum_3, unsigned long tiempo_eje_colum_4){
-
-  tiempos_eje_columnas[0] = tiempo_eje_colum_0;
-  tiempos_eje_columnas[1] = tiempo_eje_colum_1;
-  tiempos_eje_columnas[2] = tiempo_eje_colum_2;
-  tiempos_eje_columnas[3] = tiempo_eje_colum_3;
-  tiempos_eje_columnas[4] = tiempo_eje_colum_4;
-
-}
-
+/*--------CREA UN ARREGLO CON LOS TIEMPOS DE EJECUCION DE CADA BLOQUE DE INSTRUCCIONES-----*/
 unsigned long *crear_arreglo_tiempos_ejecucion_bloques(){
   unsigned long *nuevos_tiempos_eje_bloques = NULL;
 
@@ -172,14 +155,22 @@ unsigned long *crear_arreglo_tiempos_ejecucion_bloques(){
   }
 
 return nuevos_tiempos_eje_bloques;}
+/*------------------------------------------------------------------------------------------*/
 
-void inicializar_arreglo_tiempos_ejecucion_bloques(){ //inicializa el arreglo que contiene los tiempos de ejecuion de cada bloque
+
+
+/*---INICIALIZA EL ARREGLO QUE ALMACENA LOS TIEMPOS DE EJECUCION DE CADA BLOQUE---*/
+void inicializar_arreglo_tiempos_ejecucion_bloques(){ 
 
   for(int i = 0; i < 5; i++){
     tiempos_eje_bloques[i] = 0;
   }
 }
+/*--------------------------------------------------------------------------------*/
 
+
+
+/*--ESTABLECE LOS TIEMPOS DE EJECUCION DE CADA BLOQUE DE INSTRUCCIONES EN EL ARREGLO QUE LOS ALMACENA--*/
 void establecer_tiempos_eje_arreglo_tiempos_bloques(unsigned long tiempo_bloque_0,unsigned long tiempo_bloque_1,unsigned long tiempo_bloque_2, unsigned long tiempo_bloque_3, unsigned long tiempo_bloque_4){
 
   tiempos_eje_bloques[0] = tiempo_bloque_0;
@@ -187,9 +178,12 @@ void establecer_tiempos_eje_arreglo_tiempos_bloques(unsigned long tiempo_bloque_
   tiempos_eje_bloques[2] = tiempo_bloque_2;
   tiempos_eje_bloques[3] = tiempo_bloque_3;
   tiempos_eje_bloques[4] = tiempo_bloque_4;
-
 }
-/*----CREA UNA NUEVA FUNCIONALIDAD PARTIENDO DE SU UID Y EL PUNTERO A LA FUNCION QUE CORRESPONDE----*/
+/*----------------------------------------------------------------------------------------------------*/
+
+
+
+/*----CREA UNA NUEVA FUNCIONALIDAD PARTIENDO DE SU UID,  EL PUNTERO A LA FUNCION QUE LE CORRESPONDE Y SU TIEMPO DE EJECUCION----*/
 Funcionalidad *crear_nueva_funcionalidad(String UID, void (*Ptr)(), int type, Funcionalidad *next_func, unsigned long exec_time){
 	Funcionalidad *nueva_func = NULL;
   char *puntero = NULL;
@@ -220,6 +214,9 @@ Funcionalidad *crear_nueva_funcionalidad(String UID, void (*Ptr)(), int type, Fu
 return nueva_func;}
 /*-------------------------------------------------------------------------------------------------*/
 
+
+
+/*-CREA UN ARREGLO  DONDE SE ALMACENARAN LOS INDICES DE LAS FUNCIONALIDADES A EJECUTAR EN CADA BLOQUE-----*/
 int crear_memoria_instrucciones(){
 
   if (( memoria_instrucciones = (int ***) malloc(5* sizeof (int **))) == NULL){
@@ -238,6 +235,9 @@ int crear_memoria_instrucciones(){
     }
   }
 }
+/*-----------------------------------------------------------------------------------------------------*/
+
+
 
 /*---CREA UN ARREGLO CON LAS FUNCIONALIDADES Y LO INICIALIZA CON SUS RESPECTIVOS VALORES--*/
 void crear_arreglo_funcionalidades(){
@@ -249,81 +249,68 @@ void crear_arreglo_funcionalidades(){
   }
 
   funcionalidades[0] = crear_nueva_funcionalidad("B3 54 7A 12", &prueba, 1, NULL,0); //SINCRONIZACION
-  funcionalidades[1] = crear_nueva_funcionalidad("E3 F3 F0 94", &prueba, 1, NULL,0); //VOLVER A COMENZAR
+  funcionalidades[1] = crear_nueva_funcionalidad("E3 F7 A7 12", &prueba, 1, NULL,0); //VOLVER A COMENZAR
   funcionalidades[2] = crear_nueva_funcionalidad("A3 CE 89 94", &prueba, 1, NULL,0); //COMENZAR PROGRAMA
   funcionalidades[3] = crear_nueva_funcionalidad("43 26 C4 12", &prueba, 1, NULL,0); //FINALIZAR PROGRAMA
   funcionalidades[4] = crear_nueva_funcionalidad("A3 3E 72 94", &prueba, 0, NULL,0); //BORRAR
   funcionalidades[5] = crear_nueva_funcionalidad("E3 FC B3 12", &prueba, 2, NULL,0); //EJECUTAR PROGRAMA
   funcionalidades[6] = crear_nueva_funcionalidad("93 02 86 94", &prueba, 2, NULL,0); //PAUSAR
-  funcionalidades[7] = crear_nueva_funcionalidad("53 12 73 94", &funcion_3, 3, NULL,5000); //MOVER CABEZA A LA IZQUIERDA
-  funcionalidades[8] = crear_nueva_funcionalidad("F3 94 8B 94", &funcion_4, 3, NULL,5000); //MOVER CABEZA A LA DERECHA
+  funcionalidades[7] = crear_nueva_funcionalidad("53 12 73 94", &prueba, 3, NULL,3000); //MOVER CABEZA A LA IZQUIERDA
+  funcionalidades[8] = crear_nueva_funcionalidad("F3 94 8B 94", &prueba, 3, NULL,3000); //MOVER CABEZA A LA DERECHA
   funcionalidades[9] = crear_nueva_funcionalidad("33 22 B7 94", &prueba, 3, NULL,5000); //AGITAR COLA
   funcionalidades[10] = crear_nueva_funcionalidad("83 0E AA 12", &prueba, 4, NULL,5000); //AVANZAR
-  funcionalidades[11] = crear_nueva_funcionalidad("13 45 8A 94", &prueba, 4, NULL, 5000); //GIRAR A LA DERECHA
-  funcionalidades[12] = crear_nueva_funcionalidad("D3 DF 81 94", &prueba, 4, NULL,5000); //GIRAR SOBRE SI MISMO
-  funcionalidades[13] = crear_nueva_funcionalidad("B3 23 8F 94", &prueba, 4, NULL,5000); //VOLVER POR LA DERECHA
+  funcionalidades[11] = crear_nueva_funcionalidad("13 45 8A 94", &prueba, 4, NULL, 3000); //GIRAR A LA DERECHA
+  funcionalidades[12] = crear_nueva_funcionalidad("D3 DF 81 94", &prueba, 4, NULL,6000); //GIRAR SOBRE SI MISMO
+  funcionalidades[13] = crear_nueva_funcionalidad("B3 23 8F 94", &prueba, 4, NULL,4000); //VOLVER POR LA DERECHA
   funcionalidades[14] = crear_nueva_funcionalidad("13 63 6B 94", &prueba, 4, NULL,5000); //RETROCEDER
-  funcionalidades[15] = crear_nueva_funcionalidad("83 11 6B 94", &prueba, 4, NULL, 5000); //GIRAR A LA IZQUIERDA
-  funcionalidades[16] = crear_nueva_funcionalidad("33 09 BB 94", &prueba, 4, NULL,5000); //EVITAR OBSTACULOS
-  funcionalidades[17] = crear_nueva_funcionalidad("93 E2 20 95", &prueba, 4, NULL, 5000); //VOLVER POR LA IZQUIERDA
-  funcionalidades[18] = crear_nueva_funcionalidad("23 DE 6C 94", &encender_luces, 5, NULL, 5000); //ENCENDER LUCES
-  funcionalidades[19] = crear_nueva_funcionalidad("13 7C 72 94", &funcion_2, 5, NULL, 3000); //APAGAR LUCES
-  funcionalidades[20] = crear_nueva_funcionalidad("F3 A9 89 94", &funcion_2, 6, NULL, 5000); //ABRIR OJOS
-  funcionalidades[21] = crear_nueva_funcionalidad("93 D3 80 94", &prueba, 6, NULL, 5000); //CERRAR OJOS
-  funcionalidades[22] = crear_nueva_funcionalidad("63 36 C6 94", &prueba, 6, NULL, 8000); //PESTANEAR
-  funcionalidades[23] = crear_nueva_funcionalidad("D3 12 74 94", &grabar_audio, 7, NULL,10000); //GRABAR AUDIO
-  funcionalidades[24] = crear_nueva_funcionalidad("53 2D 89 94", &reproducir_grabacion,7, NULL,10000); //REPRODUCIR GRABACION //"53 2D 89 94"
-  funcionalidades[25] = crear_nueva_funcionalidad("A3 7A CB 94", &emitir_sonido,7, NULL,10000); //REPRODUCIR GRABACION //"53 2D 89 94"
-  funcionalidades[26] = crear_nueva_funcionalidad("73 4B AA 94", &prueba, 0, NULL, 5000); //BLANCO
-  funcionalidades[27] = crear_nueva_funcionalidad("73 4B AA 94", &prueba, 0, NULL, 5000); //NARANJA
-  funcionalidades[28] = crear_nueva_funcionalidad("83 9D 6D 94", &prueba, 0, NULL, 5000); //AMARILLO
-  funcionalidades[29] = crear_nueva_funcionalidad("E3 D3 6B 12", &prueba, 0, NULL, 5000); //ROJO
-  funcionalidades[30] = crear_nueva_funcionalidad("B3 05 6E 12", &prueba, 0, NULL, 5000); //AZUL
-  funcionalidades[31] = crear_nueva_funcionalidad("F3 43 C6 12", &prueba, 0, NULL, 5000); //MORADO
-  funcionalidades[32] = crear_nueva_funcionalidad("93 F1 C7 12", &prueba, 0, NULL, 5000); //VERDE
-  funcionalidades[33] = crear_nueva_funcionalidad("83 75 A9 94", &prueba, 0, NULL, 5000); //ROSA
-    //void (*P)() = (funcionalidades[5])->Ptr_func;
-   // P();
-
+  funcionalidades[15] = crear_nueva_funcionalidad("83 11 6B 94", &prueba, 4, NULL, 3000); //GIRAR A LA IZQUIERDA
+  funcionalidades[16] = crear_nueva_funcionalidad("33 09 BB 94", &prueba, 4, NULL,15000); //EVITAR OBSTACULOS
+  funcionalidades[17] = crear_nueva_funcionalidad("93 E2 20 95", &prueba, 4, NULL, 4000); //VOLVER POR LA IZQUIERDA
+  funcionalidades[18] = crear_nueva_funcionalidad("23 DE 6C 94", &encender_luces, 5, NULL, 25000); //ENCENDER LUCES
+  funcionalidades[19] = crear_nueva_funcionalidad("F3 A9 89 94", &prueba, 6, NULL, 2000); //ABRIR OJOS
+  funcionalidades[20] = crear_nueva_funcionalidad("93 D3 80 94", &prueba, 6, NULL, 2000); //CERRAR OJOS
+  funcionalidades[21] = crear_nueva_funcionalidad("63 36 C6 94", &prueba, 6, NULL, 4000); //PESTANEAR
+  funcionalidades[22] = crear_nueva_funcionalidad("D3 12 74 94", &grabar_audio, 7, NULL,10000); //GRABAR AUDIO
+  funcionalidades[23] = crear_nueva_funcionalidad("53 2D 89 94", &reproducir_grabacion,7, NULL,10000); //REPRODUCIR GRABACION
+  funcionalidades[24] = crear_nueva_funcionalidad("A3 7A CB 94", &emitir_sonido,7, NULL,10000); //EMITIR SONIDO
+  funcionalidades[25] = crear_nueva_funcionalidad("E3 F3 F0 94", &prueba, 0, NULL, 5000); //BLANCO
+  funcionalidades[26] = crear_nueva_funcionalidad("73 4B AA 94", &prueba, 0, NULL, 5000); //NARANJA
+  funcionalidades[27] = crear_nueva_funcionalidad("83 9D 6D 94", &prueba, 0, NULL, 5000); //AMARILLO
+  funcionalidades[28] = crear_nueva_funcionalidad("E3 D3 6B 12", &prueba, 0, NULL, 5000); //ROJO
+  funcionalidades[29] = crear_nueva_funcionalidad("B3 05 6E 12", &prueba, 0, NULL, 5000); //AZUL
+  funcionalidades[30] = crear_nueva_funcionalidad("F3 43 C6 12", &prueba, 0, NULL, 5000); //MORADO
+  funcionalidades[31] = crear_nueva_funcionalidad("93 F1 C7 12", &prueba, 0, NULL, 5000); //VERDE
+  funcionalidades[32] = crear_nueva_funcionalidad("83 75 A9 94", &prueba, 0, NULL, 5000); //ROSA
 }
 /*-------------------------------------------------------------------------------------*/
 
-/*----------------------------------------------------------------------------------------------*/
+
+
+/*----ENCIENDE O APAGA LAS LUCES LEDS DEL ROBOT DADA LA VARIABLE QUE INDICA SI HA LLEGADO EL TIEMPO DE FINALIZACION DE LA INSTRUCCION-----*/
 void encender_luces(bool fin_eje_inst){
 
- 
   if(!fin_eje_inst){
-
-    Serial.print("LUCES--------------->");
-    Serial.println(luces);
     for(int i = 0; i < NUM_LEDS ; i++){
-      //Color *color = 
       color_led.setPixelColor(i, color_led.Color(colores[memoria_colores_luces[luces]]->R,colores[memoria_colores_luces[luces]]->G, colores[memoria_colores_luces[luces]]->B));
     }
     color_led.show();
     luces++;
   }else{
-    Serial.println("SE ACABO LA LUZ");
-    apagar_luces();
-    
-  }
-}
-
-void apagar_luces(){
-
-  Serial.println("ENTRO A APAGAR LAS LUCES");
-
     for(int i = 0; i < NUM_LEDS ; i++){
       color_led.setPixelColor(i, color_led.Color(0,0,0));
     }
-  
     color_led.show();
+  }
 }
+/*---------------------------------------------------------------------------------------------------------------------------------------*/
 
+
+
+/*----GRABA EL AUDIO INDICADO POR EL MICROFONO DURANTE UN TIEMPO ESTIMADO-----*/
 void grabar_audio(){
   bool fin_eje_inst = false;
   long unsigned tiempo_inicio = millis();
-  Serial.println("GRABANDO");
+
   grabacion = true;
 
   do{
@@ -332,14 +319,17 @@ void grabar_audio(){
       fin_eje_inst = true;
       digitalWrite(REC,HIGH);
     }
-    Serial.println("G");
   }
   while(millis() - tiempo_inicio < 10000);
 
   digitalWrite(REC,LOW);
  
 }
+/*---------------------------------------------------------------------------*/
 
+
+
+/*----REPRODUCE LA GRABACION DADA LA VARIABLE QUE INDICA SI HA LLEGADO EL TIEMPO DE FINALIZACION DE LA INSTRUCCION-----*/
 void reproducir_grabacion(bool fin_eje_inst){
 
   if(!fin_eje_inst){
@@ -349,18 +339,26 @@ void reproducir_grabacion(bool fin_eje_inst){
   }
 
 }
+/*-------------------------------------------------------------------------------------------------------------------*/
 
+
+
+/*------INICIALIZA EL ARREGLO(MEMORIA) QUE SE ENCARGA DE ALMACENAR LAS FUNCIONALIDADES A EJECUTAR EN EL PROGRAMA----*/
 void inicializar_memoria(){
 
-  for( int dim = 0 ; dim<5 ; dim++){
-    for(int filas = 0 ; filas<8 ; filas++){
-      for( int colum = 0 ; colum<5 ; colum++){
+  for( int dim = 0 ; dim < 5 ; dim++){
+    for(int filas = 0 ; filas < 8 ; filas++){
+      for( int colum = 0 ; colum < 5 ; colum++){
         memoria_instrucciones[dim][filas][colum] = 0;
       }   
     }  
   }
 }
+/*----------------------------------------------------------------------------------------------------------*/
 
+
+
+/*---IMPRIME LA MEMORIA DE INSTRUCCIONES A EJECUTAR EN EL PROGRAMA EN EL SERIAL MONITOR---*/
 void imprimir_matriz(){
 
   for( int dim = 0 ; dim<5 ; dim++){
@@ -377,7 +375,11 @@ void imprimir_matriz(){
     Serial.println();
   }
 }
+/*------------------------------------------------------------------------------------*/
 
+
+
+/*-----INICIALIZA EL MODULO DE SONIDO----*/
 void inicializar_sonido(){
   DFP.begin(9600);
 
@@ -390,12 +392,13 @@ void inicializar_sonido(){
 
   Serial.println(F("DFPlayer en linea :D"));
   MP3.volume(30);
-  //MP3.pause();
 }
+/*-----------------------------------------*/
 
+
+
+/*----EMITE SONIDO DADA LA VARIABLE QUE INDICA SI SE HA LLEGADO AL FIN DE LA EJECUCION DE LA INSTRUCCION---*/
 void emitir_sonido(bool fin_eje_inst){
-
-  Serial.println("ENTRO A EMITIR SONIDO");
 
   if(!fin_eje_inst){
     MP3.play(1); 
@@ -403,6 +406,9 @@ void emitir_sonido(bool fin_eje_inst){
     MP3.pause();   
   }
 }
+/*-----------------------------------------------------------------------------------------------------------*/
+
+
 
 /*--FUNCIONES QUE SE EJECUTAN UNA SOLA VEZ--*/
 void setup(void) {
@@ -410,19 +416,14 @@ void setup(void) {
   pinMode(REC, OUTPUT);  
   pinMode(PLAYER, OUTPUT);
  
-
   #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
     clock_prescale_set(clock_div_1);
   #endif
   // END of Trinket-specific code.
 
- 
-
-
   while(!Serial){
       
   }
-  Serial.println("NDEF Reader");
   crear_arreglo_funcionalidades();  
   crear_memoria_instrucciones();
   inicializar_memoria();
@@ -430,8 +431,6 @@ void setup(void) {
   inicializar_colores_led();
   inicializar_memoria_colores_luces();
   color_led.begin();
-  apagar_luces();
-  
   nfc.begin();
 }
 /*------------------------------------------*/
@@ -439,15 +438,11 @@ void setup(void) {
 void prueba(){
   Serial.println("PRUEBITA");
 }
-void imprimir_funcionalidades(){
-  String UID;
 
-  for(int i = 0; i <= 26 ; i++){
-    UID = funcionalidades[i]->UID;
-    Serial.println(UID);  
-  }
-}
 
+
+
+/*---INTRODUCE EL INDICE DE UNA FUNCIONALIDAD EN LA MEMORIA DE INSTRUCCIONES DADO SU INDICE, LA COLUMNA Y EL BLOQUE DONDE SERA INTRODUCIDA--------*/
 void introducir_inst_columna_memoria(int indice_func, int colum, int dim){
   bool almacenado = false;
 
@@ -463,141 +458,65 @@ void introducir_inst_columna_memoria(int indice_func, int colum, int dim){
     Serial.println("NO HAY ESPACIO PARA ALMACENAR OTRA INSTRUCCION DE ESE TIPO");
   }
 }
-
-/*void identificar_color_tarjeta(char *UID, char *UID_aux, int pos_color, int pos_inst, int *tipo_inst){
-      
-    if((strcmp(UID,UID_aux) == 0)){ //si se ha escaneado el color blanco
-        void (*Funcionalidad)() = NULL;
-        Funcionalidad = (funcionalidades[pos_inst])->Ptr_func;
-        Funcionalidad();
-        *tipo_inst = 0; //para que identifique cuales los las inst a almacenar
-        luces++;
-        inicializar_memoria_colores_luces();
-        agregar_color_luces_memoria(pos_color);
-        }
+/*----------------------------------------------------------------------------------------------------------------------------------*/
 
 
-}*/
-void imprimir_color_led(){
-   Serial.println("IMPRIMIENDO COLORES");
-  for(int i = 0; i<  luces; i++){
-     Serial.print("I: ");
-     Serial.println(i);
-    uint8_t R = colores[memoria_colores_luces[i]]->R;
-    uint8_t G = colores[memoria_colores_luces[i]]->G;
-    uint8_t B = colores[memoria_colores_luces[i]]->B;
-    Serial.println(String(R) + " " + String(G) + " " + String(B));
+
+/*--VERIFICA CUAL COLOR HA SIDO SELECCIONADO Y AGREGA SU INDICE A LA MEMORIA DE LUCES DE COLORES EN CASO DE SER IGUALES LOS UID---*/
+void verificar_color_tarjeta(char *UID, char *UID_aux, int pos_color, int *tipo_inst){
+  
+  if((strcmp(UID,UID_aux) == 0) && (luces >= 0) && (luces > color_reg)){ 
+    *tipo_inst = 0;
+    color_reg++;
+    agregar_color_luces_memoria(pos_color);
   }
-  Serial.println("TERMINO DE IMPRIMIR");
 }
+/*---------------------------------------------------------------------------------------------------------------------------------*/
 
+
+
+/*------------ALMACENA UNA INSTRUCCION EN LA MEMORIA DE INSTRUCCIONES DADO SU UID--------*/
 int almacenar_instruccion(char *UID){
   char  *UID_aux = NULL;
   int tipo_inst = -1;
-  bool vacio = false;
 
-  for(int i = 0; i <= 32 ; i++){ //se identifica
+  for(int i = 0; i <= 32 ; i++){ //REVISA TODAS LAS FUNCIONALIDADES
     UID_aux = NULL;
     UID_aux = funcionalidades[i]->UID;
-    Serial.println("---");
 
-    Serial.println(UID);
-    Serial.println(UID_aux);
-
-    if(strcmp(UID,UID_aux) == 0){ 
+    if(strcmp(UID,UID_aux) == 0){  //SI ENCUENTRA LA INSTRUCCION
         tipo_inst = funcionalidades[i]->type;
-        Serial.print("TIPO INSTRUCCION-> ");
-        Serial.println(funcionalidades[i]->type);
 
-      if(i == 0 ){ //detecto una tarjeta de sincronizacion . REVISAR QUE LA MATRIZ NO ESTE VACIA PARA HACER EL CAMBIO DE CARA //cambiar por el uid 
-        vacio = verificar_bloque_instrucciones_vacio(0);
-        if(!vacio){ 
-          sincronizacion ++; //Cada sincronizacion representa un bloque de instruccciones a almacenar, lo que a su vez representa una dimension
-        } 
+      if((strcmp(UID,"B3 54 7A 12") == 0) && !verificar_bloque_instrucciones_vacio(0) ){ //SI SE HA ESCANEADO TAG SINCRONIZACION Y EL BLOQUE NO ESTA VACIO
+          sincronizacion ++; //SE PASA AL SIGUIENTE BLOQUE (SINCRONIZACION == BLOQUE)
       }
       
-      if((strcmp(UID,"D3 12 74 94") == 0)){ //si se ha escaneado la tarjeta de grabar audio
+      if((strcmp(UID,"D3 12 74 94") == 0)){ //SI SE HA ESCANEADO TAG GRABAR AUDIO
         void (*Funcionalidad)() = NULL;
         Funcionalidad = (funcionalidades[i])->Ptr_func;
         Funcionalidad();
         tipo_inst = 0;
       }
 
-      if((strcmp(UID,"53 2D 89 94") == 0)){ //si se ha escaneado la tarjeta de reproducir audio
-       //Verifica SI NO HAY grabado algo PARA SER REPRODUCIDO
-       if(!grabacion){
+      if((strcmp(UID,"53 2D 89 94") == 0) && !grabacion){ //SI SE HA ESCANEADO TAG REPRODUCIR AUDIO Y NO HAY GRABACION PREVIA
         tipo_inst = 0;
         Serial.println("NO HAY GRABACION PARA SER REPRODUCIDA");
-       }
       }
 
-      ////23 DE 6C 94
-      if((strcmp(UID,"23 DE 6C 94") == 0)){ //si se ha escaneado la tarjeta de luces leds
-        //tipo_inst = 0;
-        Serial.println("TIPO DE INSTRUCCION");
+      if((strcmp(UID,"23 DE 6C 94") == 0)){ //SI SE HA ESCANEADO TAG ENCENDER LUCES
         luces++;
-        imprimir_color_led();
-        
       }
 
-      if((strcmp(UID,"73 4B AA 94") == 0) && (luces >= 0) && (luces > color_reg)){ //si se ha escaneado el color blanco y se ha escaneado previamente la tag luces y no se ha definido ya el color de ese encendido
-        tipo_inst = 0; //para que identifique cuales los las inst a almacenar
-        color_reg++;
-        agregar_color_luces_memoria(0);
-        imprimir_color_led();
-        
-        }
-
-      if((strcmp(UID,"73 4B AA 94") == 0) && (luces >= 0) && (luces > color_reg)){ //si se ha escaneado el color naranja
-        tipo_inst = 0; //para que identifique cuales los las inst a almacenar
-        color_reg++;
-        agregar_color_luces_memoria(1);
-        imprimir_color_led();
-        }
-
-      if((strcmp(UID,"83 9D 6D 94") == 0) && (luces >= 0) && (luces > color_reg)){ //si se ha escaneado el color AMARILLO
-        tipo_inst = 0; //para que identifique cuales los las inst a almacenar
-        color_reg++;
-        agregar_color_luces_memoria(2);
-        imprimir_color_led();
-      }
-        
-        if((strcmp(UID,"E3 D3 6B 12") == 0) && (luces >= 0) && (luces > color_reg)){ //si se ha escaneado el color ROJO
-        tipo_inst = 0; //para que identifique cuales los las inst a almacenar
-        color_reg++;
-        agregar_color_luces_memoria(3);
-        imprimir_color_led();
-      }
-
-        if((strcmp(UID,"B3 05 6E 12") == 0) && (luces >= 0) && (luces > color_reg)){ //si se ha escaneado el color AZUL
-        tipo_inst = 0; //para que identifique cuales los las inst a almacenar
-        color_reg++;
-        agregar_color_luces_memoria(4);
-        imprimir_color_led();
-      }
-
-        if((strcmp(UID,"F3 43 C6 12") == 0) && (luces >= 0) && (luces > color_reg)){ //si se ha escaneado el color MORADO
-        tipo_inst = 0; //para que identifique cuales los las inst a almacenar
-        color_reg++;
-        agregar_color_luces_memoria(5);
-        imprimir_color_led();
-      }
-
-        if((strcmp(UID,"93 F1 C7 12") == 0) && (luces >= 0) && (luces > color_reg)){ //si se ha escaneado el color VERDE
-        tipo_inst = 0; //para que identifique cuales los las inst a almacenar
-        color_reg++;
-        agregar_color_luces_memoria(6);
-        imprimir_color_led();
-      }
-
-        if((strcmp(UID,"83 75 A9 94") == 0) && (luces >= 0) && (luces > color_reg)){ //si se ha escaneado el color ROSA
-        tipo_inst = 0; //para que identifique cuales los las inst a almacenar
-        color_reg++;
-        agregar_color_luces_memoria(7);
-        imprimir_color_led();
-      }
-
-         if(tipo_inst != 0 && tipo_inst != 1 && tipo_inst != 2){ //si no son instrucciones administrativas almacenalas en la matriz 
+      verificar_color_tarjeta(UID, "E3 F3 F0 94", 0 , &tipo_inst);
+      verificar_color_tarjeta(UID, "73 4B AA 94", 1 , &tipo_inst);
+      verificar_color_tarjeta(UID, "83 9D 6D 94", 2 , &tipo_inst);
+      verificar_color_tarjeta(UID, "E3 D3 6B 12", 3 , &tipo_inst);
+      verificar_color_tarjeta(UID, "B3 05 6E 12", 4 , &tipo_inst);
+      verificar_color_tarjeta(UID, "F3 43 C6 12", 5 , &tipo_inst);
+      verificar_color_tarjeta(UID, "93 F1 C7 12", 6 , &tipo_inst);
+      verificar_color_tarjeta(UID, "83 75 A9 94", 7 , &tipo_inst);
+      
+      if(tipo_inst != 0 && tipo_inst != 1 && tipo_inst != 2){ //SI NO SON INSTRUCCIONES ADMINISTRATIVAS ALMACENA EN LA MEMORIA DE INSTRUCCIONES
         int dimen = sincronizacion;
         switch(tipo_inst){
           case 3: {
@@ -626,17 +545,19 @@ int almacenar_instruccion(char *UID){
       return 1;
     } 
 
-
   }
-  
 return 0;
 }
+/*----------------------------------------------------------------------------------------------*/
 
+
+
+/*---VERIFICA SI UN BLOQUE TIENE INSTRUCCIONES ALMACENADAS. DEVUELVE TRUE EN CASO DE QUE SE ENCUENTRE VACIO---*/
 bool verificar_bloque_instrucciones_vacio(int bloque){ //devuelve 1 si se encuentra vacio, 0 si esta lleno
   int vacio = 0;
 
   for(int i = 0 ; i<5 ; i++){
-    if(memoria_instrucciones[bloque][0][i] == 0){
+    if(memoria_instrucciones[bloque][0][i] == 0){ //SI LO QUE ESTA EN LA PRIMERA POSICION DE LA COLUMNA ES CERO
       vacio ++;
     }
   }
@@ -647,8 +568,12 @@ bool verificar_bloque_instrucciones_vacio(int bloque){ //devuelve 1 si se encuen
     return false;
   } 
 }
+/*-----------------------------------------------------------------------------------------------------------*/
 
-unsigned long tiempo_eje_columna_instrucciones(int bloque, int colum){ //busca la columna que que dure mas tiempo en ejecutarse. Ese es el tiempo que debe demorar el bloque de instrucciones completo
+
+
+/*---DETERMINA EL TIEMPO DE EJECUCION DE UNA COLUMNA DADO EL BLOQUE DE INSTRUCCIONES AL QUE PERTENECE---*/
+unsigned long tiempo_eje_columna_instrucciones(int bloque, int colum){
   unsigned long duracion = 0, duracion_max = 0;
     
     for(int j = 0; j < 8; j++){
@@ -658,14 +583,14 @@ unsigned long tiempo_eje_columna_instrucciones(int bloque, int colum){ //busca l
         break;
       }
     }
-
-     Serial.print("DURACION COLUMNA INSTRUCCIONES-->");
-      Serial.println(duracion);
-    
 return duracion;
 }
+/*--------------------------------------------------------------------------------------------------------*/
 
-unsigned long tiempo_duracion_bloque_instrucciones(int bloque){ //busca la columna que que dure mas tiempo en ejecutarse. Ese es el tiempo que debe demorar el bloque de instrucciones completo
+
+
+/*---DETERMINA EL TIEMPO MAXIMO QUE DURA UN BLOQUE PARTIENDO DE LA COLUMNA QUE TARDA MAS EN EJECUTARSE---*/
+unsigned long tiempo_duracion_bloque_instrucciones(int bloque){ 
   unsigned long duracion = 0, duracion_max = 0;
 
   for(int i = 0 ; i < 5; i++){
@@ -686,7 +611,11 @@ unsigned long tiempo_duracion_bloque_instrucciones(int bloque){ //busca la colum
   }
 return duracion_max;
 }
+/*-------------------------------------------------------------------------------------------------*/
 
+
+
+/*---DETERMINA EL TIEMPO QUE DURA EL PROGRAMA PARTIENDO DEL TIEMPO DE EJECUCION DE CADA BLOQUE---*/
 unsigned long duracion_programa(){
   unsigned long tiempo_eje_programa = 0;
 
@@ -695,172 +624,117 @@ unsigned long duracion_programa(){
   }
 return tiempo_eje_programa;
 }
+/*------------------------------------------------------------------------------------------------*/
 
+
+
+/*-----------------------------ESCANEA LAS TARJETAS-----------------------------------------------*/
 void escanear_instrucciones(){
 
    while(!ejecutar_programa){
+
     if (nfc.tagPresent()){
       NfcTag tag = nfc.read();
-      //tag.print();
       String TagUID = tag.getUidString();
       char *ptrUID = NULL;
       ptrUID = new char[TagUID.length() + 1];
       strcpy(ptrUID, TagUID.c_str());
-      Serial.println(ptrUID);
 
-      if((strcmp(ptrUID,"E3 FC B3 12") == 0) && comenzar_programa && finalizar_programa){ //si se ha escaneado la tarjeta de ejecutar programa
-        ejecutar_programa = true; //si ya indicaronn ejecutar programa
+      if((strcmp(ptrUID,"E3 FC B3 12") == 0) && comenzar_programa && finalizar_programa){ //SI SE HA ESCANEADO TAG EJECUTAR PROGRAMA Y YA SE REALIZO LA ESCRITURA CORRESPONDIENTE DE INSTRUCCIONES
+        ejecutar_programa = true; 
         sincronizacion = 0;
         comenzar_programa = false;
         finalizar_programa = false;
       }
 
-      if(comenzar_programa && !finalizar_programa){ //Si se ha iniciado la escritura del programma y no se ha finalizado la misma comienza a almacenar en memoria
+      if(comenzar_programa && !finalizar_programa){ //SI SE HA INICIADO LA ESCRITURA DEL PROGRAMA Y NO SE HA FINALIZADO COMIENZA A ALMACENAR LAS PROXIMAS TAG ESCANEADAS EN MEMORIA
         if (almacenar_instruccion(ptrUID)){
           imprimir_matriz();
         }
       }
 
-      if((strcmp(ptrUID, "A3 CE 89 94") == 0) && !comenzar_programa){ //Si el UID es comenzar programa y esta tarjeta no ha sido escaneada previamente indica que ya comenzo la escritura de instrucciones en el programa
+      if((strcmp(ptrUID, "A3 CE 89 94") == 0) && !comenzar_programa){ //SI SE HA ESCANEADO TAG COMENZAR PROGRAMA Y ESTA NO HA SIDO ESCANEADA SE COMIENZA LA ESCRITURA DEL MISMO 
         comenzar_programa = true;
       }
-
-      if((strcmp(ptrUID,"43 26 C4 12") == 0) && !finalizar_programa && comenzar_programa){ //Si el UID es finalizar programa y esta tarjeta no ha sido escaneada previamente indica que ya finalizo la escritura de instrucciones en el programa
-        finalizar_programa = true;
-      }
-
-      if((strcmp(ptrUID,"E3 F3 F0 94") == 0) && comenzar_programa && finalizar_programa){ //Si el UID es volver a comenzar y ya se escaneo la tarjeta de comienzo y finalizacion del programa quiere decir que el usuario desea una iteracion adicional de este
+      if((strcmp(ptrUID,"E3 F7 A7 12") == 0) && comenzar_programa && finalizar_programa){ //SI SE HA ESCANEADO LA TAG VOLVER A COMENZAR Y YA SE REALIZO LA ESCRITURA CORRESPONDIENTE DE INSTRUCCIONES INDICA NUEVA ITERACION
         volver_a_comenzar++; //indica el numero de iteraciones a realizar
       }
+      if((strcmp(ptrUID,"43 26 C4 12") == 0) && !finalizar_programa && comenzar_programa){ //SI SE HA ESCANEADO TAG FINALIZAR PROGRAMA Y ESTA AUN NO HA SIDO ESCANEADA PERO YA SE COMENZO LA ESCRITURA DE INSTRUCCIONES FINALIZALA
+        finalizar_programa = true;
+      }  
     }
+    delay(300);
   }
 }
-
-void funcion_1(bool fin_eje_inst){
-
-  if(!fin_eje_inst){
-    //digitalWrite(10, HIGH);
-    digitalWrite(8, HIGH);
-  }else{
-      //digitalWrite(10, LOW);
-      digitalWrite(8, LOW);
-  }
-
-}
-void funcion_2(bool fin_eje_inst){
-
-  if(!fin_eje_inst){
-    digitalWrite(5, HIGH);
-  }else{
-     digitalWrite(5, LOW);
-  }
-
-}
-
-void funcion_3(bool fin_eje_inst){
-
-  if(!fin_eje_inst){
-    digitalWrite(3, HIGH);
-  }else{
-     digitalWrite(3, LOW);
-  }
-
-}
-
-void funcion_4(bool fin_eje_inst){
-
-  if(!fin_eje_inst){
-    digitalWrite(2, HIGH);
-  }else{
-     digitalWrite(2, LOW);
-  }
-
-}
+/*--------------------------------------------------------------------------------------------*/
 
 
 
-void ejecutar_columna_instrucciones(int *bloque, int columna, int *fila, unsigned long *tiempo_inicio_bloque, unsigned long *tiempo_fin_bloque, unsigned long *tiempo_eje_bloque, bool *ejecutada, unsigned long *tiempo_inicio_col,unsigned long *tiempo_fin_col, bool *tiempo_exed_col, unsigned long *tiempo_inicio_inst_col, unsigned long *tiempo_inst_col, unsigned long *tiempo_eje_col){
+/*-----------------EJECUTA LA INSTRUCCION CORRESPONDIENTE DADO EL BLOQUE, LA COLUMNA Y LA FILA DONDE ESTA SE ENCUENTRA ASI COMO OTROS PARAMETROS QUE SE INDICAN A CONTINUACION---------------------------------*/
+
+//TIEMPO_INICIO_BLOQUE : TIEMPO EN EL QUE INICIA EL BLOQUE DADO
+//TIEMPO_FIN_BLOQUE : TIEMPO ACTUAL TRANSCURRIDO DESDE QUE COMENZO A EJECUTARSE EL BLOQUE DADO
+//TIEMPO_EJE_BLOQUE : TIEMPO ESTABLECIDO QUE DURA EL BLOQUE
+//EJECUTADA : BANDERA QUE INDICA SI LA INSTRUCCION YA FUE EJECUTADA PARA NO VOLVER A HACERLO
+//TIEMPO_INICIO_COL : TIEMPO EN EL CUAL COMENZO A EJECUTARSE LA COLUMNA DADA
+//TIEMPO_FIN_COL : TIEMPO ACTUAL TRANSCURRIDO DESDE QUE SE COMENZO A EJECUTAR LA COLUMNA DADA
+//TIEMPO_EXED_COL : BANDERA QUE INDICA SI EN LA COLUMNA DADA SE PRESENTA UN TIEMPO EXCEDENTE EN COMPARACION CON LA DURACION ESTABLECIDA PARA EL BLOQUE
+//TIEMPO_INICIO_INST : TIEMPO EN EL CUAL COMENZO A EJECUTARSE LA INSTRUCCION ACTUAL
+//TIEMPO_INST : TIEMPO ESTABLECIDO PARA LA EJECUCION DE LA INSTRUCCION ACTUAL
+//TIEMPO_EJE_COL : TIEMPO ESTABLECIDO PARA LA EJECUCION DE LA COLUMNA DADA
+
+void ejecutar_columna_instrucciones(int *bloque, int columna, int *fila, unsigned long *tiempo_inicio_bloque, unsigned long *tiempo_fin_bloque, unsigned long *tiempo_eje_bloque, bool *ejecutada, unsigned long *tiempo_inicio_col,unsigned long *tiempo_fin_col, bool *tiempo_exed_col, unsigned long *tiempo_inicio_inst, unsigned long *tiempo_inst, unsigned long *tiempo_eje_col){
   
   void (*Funcionalidad)(bool) = NULL;
-  Serial.println();
-  Serial.println();
-  Serial.println("/*-----------------------INICIO EJECUCION----------------------------*/");
+
   Serial.print("COLUMNA: ");
   Serial.println(columna);
 
-  if((*tiempo_fin_bloque) - (*tiempo_inicio_bloque) >= 0){//Si el tiempo transcurrido es mayor a 0 segundos
+  if((*tiempo_fin_bloque) - (*tiempo_inicio_bloque) >= 0){//VERIFICA SI EL TIEMPO TRANSCURRIDO ES MAYOR A 0 MICROSEGUNDOS
 
-  if(memoria_instrucciones[*bloque][*fila][columna] != 0)
-    if(!(*ejecutada) ){ //Verica si no se ha ejecutado la instruccion de esta fila y la comienza a ejecutar
+  if(memoria_instrucciones[*bloque][*fila][columna] != 0) //VERIFICA SI EXISTE UNA INSTRUCCION PARA EJECUTAR
+    if(!(*ejecutada) ){ //VERIFICA SI NO SE HA EJECUTADO LA INSTRUCCION
       Funcionalidad = (funcionalidades[memoria_instrucciones[*bloque][*fila][columna]])->Ptr_func;
       Funcionalidad(false);
-      *ejecutada = true; //Indica que ya esta fila comenzo a ejecutarse
-      if((*fila) == 0){
-         *tiempo_inicio_inst_col = *tiempo_inicio_bloque;
-      }else{
-        *tiempo_inicio_inst_col = millis(); //almacena el tiempo en el que comenzo a ejecutarse la instruccion actual
-      }
+      *ejecutada = true; 
 
-    }else{ //si ya fue ejecutada verifica si es momento de finalizarla
+      if((*fila) == 0){ //VERIFICA SI ES LA PRIMERA INSTRUCCION DE LA COLUMNA DADA
+         *tiempo_inicio_inst = *tiempo_inicio_bloque;
+      }else{
+        *tiempo_inicio_inst = millis(); 
+      }
+    }else{ //VERIFICA SI LA INSTRUCCION YA FUE EJECUTADA
       *tiempo_fin_col = millis();
 
-      if(!(*tiempo_exed_col)){
-        Serial.print("Fila: ");
-        Serial.println(*fila);
-        *tiempo_inst_col = funcionalidades[memoria_instrucciones[*bloque][*fila][columna]]->exec_time;
-        //SI YA SE CUMPLIO EL TIEMPO DE LA INSTRUCCION Y ADEMAS A ESE BLOQUE AUN LE QUEDAN INSTRUCCIONES POR EJECUTAR Y EL TIEMPO DE EJECUCION DE LA COLUMNA LLEGO A SU FIN
+      if(!(*tiempo_exed_col)){ //VERIFICA SI AUN NO HAY TIEMPO EXCENDENTE EN ESTA COLUMNA 
+        *tiempo_inst = funcionalidades[memoria_instrucciones[*bloque][*fila][columna]]->exec_time;
+      
+        //VERIFICA SI AUN NO SE HA ESTABLECIDO EL TIEMPO DEESTA COLUMNA Y LO ESTABLECE
         if((*tiempo_eje_col) == 0){
           *tiempo_eje_col = tiempo_eje_columna_instrucciones(*bloque, columna);
         }
-        
-        if( ((*tiempo_fin_col) - (*tiempo_inicio_inst_col)  >= *tiempo_inst_col)  && ((*tiempo_fin_col) - (*tiempo_inicio_col)  <= *tiempo_eje_bloque) && ((*tiempo_fin_col) - (*tiempo_inicio_col)  >= (*tiempo_eje_col))){
-          Serial.println("ENCONTRO UN TIEMPO EXCEDENTEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
-          //*(tiempo_inst_col) += *tiempo_eje_bloque - (*tiempo_fin_col - *tiempo_inicio_col);
-          Serial.print("Tiempo transurrido de la instruccion-->");
-          Serial.println((*tiempo_fin_col) - (*tiempo_inicio_inst_col));
-          *tiempo_inst_col += *tiempo_eje_bloque - (*tiempo_fin_col - *tiempo_inicio_col);
-          Serial.print("Tiempo excedente establecido-->");
-          
-          Serial.println(*tiempo_inst_col);
+
+        //VERIFICA SI YA SE CUMPLIO EL TIEMPO DE LA INSTRUCCION, SI A ESE BLOQUE AUN LE QUEDAN INSTRUCCIONES POR EJECUTAR Y SI EL TIEMPO DE EJECUCION DE LA COLUMNA LLEGO A SU FIN
+        if(  ((*tiempo_fin_col) - (*tiempo_inicio_col)  >= (*tiempo_eje_col)) && ((*tiempo_fin_col) - (*tiempo_inicio_col)  < *tiempo_eje_bloque) ){
+          *tiempo_inst += *tiempo_eje_bloque - (*tiempo_fin_col - *tiempo_inicio_col);
           *tiempo_exed_col = true;
         }
       }
 
-      if((*tiempo_fin_col) - (*tiempo_inicio_inst_col)  >= *tiempo_inst_col){
-          Serial.println("SE CUMPLE CONIDCION 1");
-          Serial.print((*tiempo_fin_col) - (*tiempo_inicio_inst_col) );
-          Serial.print("----");
-          Serial.println(*tiempo_inst_col );
-
-          
-      }
-
-          if(((*tiempo_fin_col) - (*tiempo_inicio_col)  >= (*tiempo_eje_bloque))){
-          Serial.println("SE CUMPLE CONIDCION 2");
-          Serial.print((*tiempo_fin_col) - (*tiempo_inicio_col) );
-          Serial.print("----");
-          Serial.println((*tiempo_eje_bloque) );
-
-      }
-
-      Serial.print("Tiempo excedente establecido22222222222222222222222-->");
-          Serial.println(*tiempo_inst_col);
-
-
-      if(((*tiempo_fin_col) - (*tiempo_inicio_inst_col)  >= *tiempo_inst_col) || ((*tiempo_fin_col) - (*tiempo_inicio_col)  >= (*tiempo_eje_bloque)) ){ //Verifica si el tiempo transcurrido desde que comenzo a ejecutarse la instruccion es igual al establecido para su ejecucion o si el tiempo para la ejecucion de la columna ya finalizo y por lo tanto la ejecucon de la instruccion
+      //VERIFICA SI EL TIEMPO TRANSCURRIDO DESDE QUE COMENZO A EJECUTARSE LA INSTRUCCION ES IGUAL AL ESTABLECIDO PARA SU EJECUCION O SI EL TIEMPO ESTABLECIDO PARA LA EJECUCION DE LA COLUMNA YA SE CUMPLIO.
+      if(((*tiempo_fin_col) - (*tiempo_inicio_inst)  >= *tiempo_inst) || ((*tiempo_fin_col) - (*tiempo_inicio_col)  >= (*tiempo_eje_bloque)) ){ 
         Funcionalidad = (funcionalidades[memoria_instrucciones[*bloque][*fila][columna]])->Ptr_func;
-        Funcionalidad(true);
-        (*fila)++;// Incrementa la fila que esta recorriendo
-        *ejecutada = false; //Indica que  esta fila termino de ejecutarse
+        Funcionalidad(true); //DESACTIVA LA INSTRUCCION
+        (*fila)++;// INCREMENTA LA FILA A RECORRER
+        *ejecutada = false; 
         *tiempo_exed_col = false;
       }
-    }
-    
+    }    
   }
 }
+/*-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 
-unsigned long tiempo_inicio_programa = 0, tiempo_fin_programa = 0;
 
 /**---FUNCIONES QUE SE EJECUTAN N VECES----*/
 void loop(void) {
@@ -876,7 +750,7 @@ void loop(void) {
 
   int bloque = 0, fila_col_0 = 0, fila_col_1 = 0, fila_col_2 = 0, fila_col_3 = 0, fila_col_4 = 0;
   bool inicio_bloque = false, ejecutada_0 = false, ejecutada_1 = false, ejecutada_2 = false, ejecutada_3 = false, ejecutada_4 = false, fin_programa = false, fin_bloque = false;
-  Serial.println("HOLA MUNDO");
+
   escanear_instrucciones();
 
   if(tiempos_eje_bloques == NULL){
@@ -893,23 +767,21 @@ void loop(void) {
   establecer_tiempos_eje_arreglo_tiempos_bloques(tiempo_eje_bloque_0,tiempo_eje_bloque_1,tiempo_eje_bloque_2,tiempo_eje_bloque_3,tiempo_eje_bloque_4);
   
   tiempo_eje_programa = duracion_programa();
-  Serial.print("----------Tiempo eje programa->");
-  Serial.print(tiempo_eje_programa);
 
-  luces = 0;
   while(volver_a_comenzar >= 0){
 
     Serial.print("**************ITERACION NRO: ");
     Serial.print(volver_a_comenzar);
     Serial.println("**************");
-    volver_a_comenzar--;
-    
     tiempo_inicio_programa = millis();
     tiempo_fin_programa = millis();
+    //imprimir_matriz();
+    luces = 0;
 
    while(!fin_programa){ //REPITE MIENTRAS EL TIEMPO TRANSCURRIDO SEA MENOR AL TIEMPO DE EJECUCION DEL PROGRAMA
-    
+      
       if (!inicio_bloque){
+        Serial.println("INICIANDO BLOQUE");
         inicio_bloque = true;
         tiempo_fin_bloque = millis();
         tiempo_inicio_bloque = millis();
@@ -921,24 +793,12 @@ void loop(void) {
         fila_col_2 = 0;
         fila_col_3 = 0;
         fila_col_4 = 0;
-        fin_bloque = false;
 
         tiempo_eje_colum_0 = 0;
         tiempo_eje_colum_1 = 0;
         tiempo_eje_colum_2 = 0;
         tiempo_eje_colum_3 = 0;
         tiempo_eje_colum_4 = 0;
-
-        /*if(tiempos_eje_columnas == NULL){
-          tiempos_eje_columnas = crear_arreglo_tiempos_ejecucion_columnas(); 
-        }*/
-       /* inicializar_arreglo_tiempos_ejecucion_columnas();
-        tiempo_eje_colum_0 = tiempo_eje_columna_instrucciones(bloque, 0);
-        tiempo_eje_colum_1 = tiempo_eje_columna_instrucciones(bloque, 1);
-        tiempo_eje_colum_2 = tiempo_eje_columna_instrucciones(bloque, 2);
-        tiempo_eje_colum_3 = tiempo_eje_columna_instrucciones(bloque, 3);
-        tiempo_eje_colum_4 = tiempo_eje_columna_instrucciones(bloque, 4);
-        establecer_tiempos_eje_arreglo_tiempos_columnas(tiempo_eje_colum_0,tiempo_eje_colum_1,tiempo_eje_colum_2,tiempo_eje_colum_3,tiempo_eje_colum_4);*/
 
       }
 
@@ -958,10 +818,8 @@ void loop(void) {
         tiempo_eje_bloque = tiempo_eje_bloque_4;
       }
 
-      /*Serial.print("BLoque a Ejecutar->");
-      Serial.println(bloque);*/
-  
-      if(memoria_instrucciones[bloque][0][0] != 0){
+      if(memoria_instrucciones[bloque][0][0] != 0){ //verifica si la columna esta vacia antes de recorrerla
+          Serial.println("LA COLUMNA CERO NO ESTA VACIA------------------------");
           ejecutar_columna_instrucciones(&bloque,0, &fila_col_0, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_0, &tiempo_inicio_col_0, &tiempo_fin_col_0, &tiempo_exed_col_0, &tiempo_inicio_inst_col_0, &tiempo_eje_inst_0, &tiempo_eje_colum_0);
       }   
       
@@ -992,26 +850,31 @@ void loop(void) {
           Serial.println("Todas las instrucciones han sido desactivadas");
           inicio_bloque = false;
           bloque++;
-          fin_bloque = true;
+         ;
         }
       }
 
-      if(tiempo_fin_programa - tiempo_inicio_programa >= tiempo_eje_programa){ //si ya llego el tiempo de terminar el programa
+      if((tiempo_fin_programa - tiempo_inicio_programa >= tiempo_eje_programa) && !inicio_bloque){ //si ya llego el tiempo de terminar el programa
         Serial.println("Llego el tiempo que dura el programa");
-        if(fin_bloque){ //Revisa si todas las instrucciones fueron desactivadas de cada columna
           Serial.println("Todas las instrucciones han sido desactivadas finaliza el programa");
           fin_programa = true; //Si todas fueron ejecutadas y se desactivaron indica el fin del programa
-        }
       }
-      
     } 
+     fin_programa = false;
+     bloque = 0;
+     volver_a_comenzar--;
+    
+
   }
-  Serial.println("NUEVO ESCANEO");
+  Serial.println("/*-------NUEVO ESCANEO-----*/");
   grabacion = false;
   volver_a_comenzar = 0;
+  luces = 0;
+  comenzar_programa = false;
+  finalizar_programa = false;
+  sincronizacion = 0;
   inicializar_memoria();
   inicializar_memoria_colores_luces();
-  luces = 0;
   color_reg = 0;
   ejecutar_programa = false;
 
