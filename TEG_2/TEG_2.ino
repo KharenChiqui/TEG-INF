@@ -138,7 +138,7 @@ void crear_arreglo_funcionalidades(){
   funcionalidades[4] = crear_nueva_funcionalidad("A3 3E 72 94", &prueba, 0, NULL,0); //BORRAR
   funcionalidades[5] = crear_nueva_funcionalidad("E3 FC B3 12", &prueba, 0, NULL,0); //EJECUTAR PROGRAMA
   funcionalidades[6] = crear_nueva_funcionalidad("93 02 86 94", &prueba, 0, NULL,0); //PAUSAR
-  funcionalidades[7] = crear_nueva_funcionalidad("13 7C 72 94", &comando_voz, 0, NULL,0); //INSTRUCCIONES POR COMANDO DE VOZ (CORREGIR UID)
+  funcionalidades[7] = crear_nueva_funcionalidad("13 7C 72 94", &prueba, 0, NULL,0); //INSTRUCCIONES POR COMANDO DE VOZ (CORREGIR UID)
   funcionalidades[8] = crear_nueva_funcionalidad("53 12 73 94", &prueba, 3, NULL,3000); //MOVER CABEZA A LA IZQUIERDA
   funcionalidades[9] = crear_nueva_funcionalidad("F3 94 8B 94", &prueba, 3, NULL,3000); //MOVER CABEZA A LA DERECHA
   funcionalidades[10] = crear_nueva_funcionalidad("33 22 B7 94", &prueba, 3, NULL,5000); //AGITAR COLA
@@ -150,11 +150,11 @@ void crear_arreglo_funcionalidades(){
   funcionalidades[16] = crear_nueva_funcionalidad("83 11 6B 94", &prueba, 4, NULL, 1350); //GIRAR A LA IZQUIERDA
   funcionalidades[17] = crear_nueva_funcionalidad("33 09 BB 94", &prueba, 4, NULL,15000); //EVITAR OBSTACULOS
   funcionalidades[18] = crear_nueva_funcionalidad("93 E2 20 95", &prueba, 4, NULL, 2700); //VOLVER POR LA IZQUIERDA
-  funcionalidades[19] = crear_nueva_funcionalidad("23 DE 6C 94", &encender_luces, 5, NULL, 5000); //ENCENDER LUCES
+  funcionalidades[19] = crear_nueva_funcionalidad("23 DE 6C 94", &prueba, 5, NULL, 5000); //ENCENDER LUCES
   funcionalidades[20] = crear_nueva_funcionalidad("F3 A9 89 94", &prueba, 6, NULL, 2000); //ABRIR OJOS
   funcionalidades[21] = crear_nueva_funcionalidad("93 D3 80 94", &prueba, 6, NULL, 2000); //CERRAR OJOS
   funcionalidades[22] = crear_nueva_funcionalidad("63 36 C6 94", &prueba, 6, NULL, 4000); //PESTANEAR
-  funcionalidades[23] = crear_nueva_funcionalidad("D3 12 74 94", &grabar_audio, 7, NULL,10000); //GRABAR AUDIO
+  funcionalidades[23] = crear_nueva_funcionalidad("D3 12 74 94", &prueba, 7, NULL,10000); //GRABAR AUDIO
   funcionalidades[24] = crear_nueva_funcionalidad("53 2D 89 94", &prueba,7, NULL,10000); //REPRODUCIR GRABACION
   funcionalidades[25] = crear_nueva_funcionalidad("A3 7A CB 94", &prueba,7, NULL,10000); //EMITIR SONIDO
   funcionalidades[26] = crear_nueva_funcionalidad("E3 F3 F0 94", &prueba, 1, NULL, 5000); //BLANCO
@@ -1055,7 +1055,14 @@ void imprimir_imagen_tarjeta(int indice){
       myFiles.load(5, 0, 310, 480, "luces_rosadas.RAW", 1 , 0);
       break;
     }
-    default: Serial.println("NO HAY IMAGEN");
+    case 34 :{ 
+      myFiles.load(5, 0, 310, 480, "tag_ir_siguiente_bloque.RAW", 1 , 0);
+      break;
+    }
+    case 35 :{ 
+      myFiles.load(5, 0, 310, 480, "tag_ir_bloque_anterior.RAW", 1 , 0);
+      break;
+    }  
   }
 
   delay(1250);
