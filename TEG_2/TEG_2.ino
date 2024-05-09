@@ -80,7 +80,7 @@ bool voz_comando = false, luces_semaforo = false;
 bool avanzando = false, precaucion = false;
 unsigned long *tiempos_eje_bloques = NULL;
 Color **colores = NULL;
-int luces = 0, bloque_nav = 0;;
+int luces = 0, num_bloques = 0;
 int color_reg = 0;
 int *memoria_colores_luces = NULL;
 unsigned long tiempo_inicio_programa = 0, tiempo_fin_programa = 0;
@@ -165,8 +165,8 @@ void crear_arreglo_funcionalidades(){
   funcionalidades[31] = crear_nueva_funcionalidad("F3 43 C6 12", &prueba, 1, NULL, 5000); //MORADO
   funcionalidades[32] = crear_nueva_funcionalidad("93 F1 C7 12", &prueba, 1, NULL, 5000); //VERDE
   funcionalidades[33] = crear_nueva_funcionalidad("83 75 A9 94", &prueba, 1, NULL, 5000); //ROSA
-  funcionalidades[34] = crear_nueva_funcionalidad("A3 D2 B7 12", &prueba, 0, NULL, 0); //SIGUIENTE BLOQUE
-  funcionalidades[35] = crear_nueva_funcionalidad("E3 00 69 12", &prueba, 0, NULL, 0); //ANTERIOR BLOQUE
+  funcionalidades[34] = crear_nueva_funcionalidad("A3 D2 B7 12", &prueba, 2, NULL, 0); //SIGUIENTE BLOQUE
+  funcionalidades[35] = crear_nueva_funcionalidad("E3 00 69 12", &prueba, 2, NULL, 0); //ANTERIOR BLOQUE
 }
 /*-------------------------------------------------------------------------------------*/
 
@@ -237,17 +237,15 @@ int almacenar_instruccion(char *UID){
   for(int i = 0; i <= 35 ; i++){ //REVISA TODAS LAS FUNCIONALIDADES
     UID_aux = NULL;
     UID_aux = funcionalidades[i]->UID;
-  Serial.print("Revisando-->UID_AUX: ");
-  Serial.print(UID_aux);
-  Serial.print("-------UID: ");
-  Serial.println(UID);
 
     if(strcmp(UID,UID_aux) == 0){  //SI ENCUENTRA LA INSTRUCCION
       imprimir_imagen_tarjeta(i);
       tipo_inst = funcionalidades[i]->type;
 
-      if((strcmp(UID,"B3 54 7A 12") == 0) && !verificar_bloque_instrucciones_vacio(0) ){ //SI SE HA ESCANEADO TAG SINCRONIZACION Y EL BLOQUE NO ESTA VACIO
-        sincronizacion ++; //SE PASA AL SIGUIENTE BLOQUE (SINCRONIZACION == BLOQUE)
+      if((strcmp(UID,"B3 54 7A 12") == 0) && !verificar_bloque_instrucciones_vacio(0) && num_bloques < 5 ){ //SI SE HA ESCANEADO TAG SINCRONIZACION , EL BLOQUE NO ESTA VACIO Y EL NUMERO DE BLOQUES ES MENOR QUE 5
+     //SE PASA AL SIGUIENTE BLOQUE (SINCRONIZACION == BLOQUE)
+        num_bloques++;
+        sincronizacion = num_bloques;
       }
       
       if((strcmp(UID,"D3 12 74 94") == 0)){ //SI SE HA ESCANEADO TAG GRABAR AUDIO
@@ -276,6 +274,13 @@ int almacenar_instruccion(char *UID){
       verificar_color_tarjeta(UID, "83 75 A9 94", 7 , &tipo_inst);
    
       //si no encontraste que le indicaron un color a las luces ponte en modo semaforo
+      if((strcmp(UID,"A3 D2 B7 12") == 0) && num_bloques > sincronizacion ){ //si verificaste que hay un bloque despues
+        sincronizacion++;
+      }
+
+      if((strcmp(UID,"E3 00 69 12") == 0) && num_bloques > 0 ){ //si verificaste que hay un bloque antes
+        sincronizacion--;
+      }
 
       if(tipo_inst != 0 && tipo_inst != 1 ){ //SI NO SON INSTRUCCIONES ADMINISTRATIVAS ALMACENA EN LA MEMORIA DE INSTRUCCIONES
      
@@ -303,9 +308,13 @@ int almacenar_instruccion(char *UID){
         } 
         imprimir_pantalla_matriz_funcionalidades(sincronizacion);
       }
+
+      Serial.println("FINIIIIIISH");
       return 1;
     } 
   }
+
+  
 return 0;
 }
 /*----------------------------------------------------------------------------------------------*/
@@ -334,6 +343,7 @@ void introducir_inst_columna_memoria(int indice_func, int colum, int dim){
 void escanear_instrucciones(){
 
   while(!ejecutar_programa){
+    //myGLCD.clrScr();
     Serial.println("escaneando tags");
     myFiles.load(5, 0, 310, 480, "escanear_tarjeta.RAW", 1 , 0);
 
@@ -359,7 +369,7 @@ void escanear_instrucciones(){
           imprimir_matriz();
         }
       }
-      if((strcmp(ptrUID,"13 7C 72 94" ) == 0) && !finalizar_programa && comenzar_programa && !navegacion_bloque){ //SI SE HA ESCANEADO TAG COMANDO VOZ Y ESTA AUN NO HA SIDO ESCANEADA PERO YA SE COMENZO LA ESCRITURA DE INSTRUCCIONES FINALIZALA
+      if((strcmp(ptrUID,"13 7C 72 94" ) == 0) && !finalizar_programa && comenzar_programa ){ //SI SE HA ESCANEADO TAG COMANDO VOZ Y ESTA AUN NO HA SIDO ESCANEADA PERO YA SE COMENZO LA ESCRITURA DE INSTRUCCIONES FINALIZALA
         myFiles.load(5, 0, 310, 480, "comando_voz.RAW", 1 , 0);
         //llamar a funcion 
         delay(2000);
@@ -373,7 +383,7 @@ void escanear_instrucciones(){
         volver_a_comenzar++; //indica el numero de iteraciones a realizar
         imprimir_imagen_tarjeta(1);
       }
-      if((strcmp(ptrUID,"43 26 C4 12") == 0) && !finalizar_programa && comenzar_programa && !navegacion_bloque){ //SI SE HA ESCANEADO TAG FINALIZAR PROGRAMA Y ESTA AUN NO HA SIDO ESCANEADA PERO YA SE COMENZO LA ESCRITURA DE INSTRUCCIONES FINALIZALA
+      if((strcmp(ptrUID,"43 26 C4 12") == 0) && !finalizar_programa && comenzar_programa){ //SI SE HA ESCANEADO TAG FINALIZAR PROGRAMA Y ESTA AUN NO HA SIDO ESCANEADA PERO YA SE COMENZO LA ESCRITURA DE INSTRUCCIONES FINALIZALA
         finalizar_programa = true; 
       }     
     }
@@ -1128,7 +1138,16 @@ void imprimir_pantalla_matriz_funcionalidades(int bloque){
     }
   }
 
+  if(num_bloques > bloque ){ //si verificaste que hay un bloque despues
+    myFiles.load(218, 455, 97, 25, "f_siguiente.RAW", 1 , 0);
+  }
+
+  if(num_bloques > 0 && bloque != 0 ){ //si verificaste que hay un bloque antes
+    myFiles.load(5, 455, 99, 25, "f_anterior.RAW", 1 , 0);
+  }
+
   delay(1500);
+  myGLCD.clrScr();
 }
 
 void imprimir_icono_tarjeta(int estado, int indice, int pos_y){
