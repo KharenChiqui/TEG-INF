@@ -5,10 +5,12 @@
 #include <SdFat.h>
 #include <UTFT.h>
 #include <UTFT_SdRaw.h>
+#include "LedControl.h"
 
 #define SD_CHIP_SELECT  53 
 SdFat sd;
-
+const int addrL = 0;  // first LED matrix - Left robot eye
+const int addrR = 1;  // second LED matrix - Right robot eye
 UTFT myGLCD(CTE40,38,39,40,41);
 UTFT_SdRaw myFiles(&myGLCD);
 #ifdef __AVR__
@@ -28,7 +30,7 @@ Servo rueda_der;
 Servo rueda_izq;
 Servo cola;
 Servo cabeza;
-
+LedControl lc=LedControl(9, 11, 10, 2); //din , clk , cs
 DFRobotDFPlayerMini MP3;
 extern uint8_t SmallFont[];
 #if 0                                               //USANDO CONVENCION SNAKE_CASE
@@ -126,7 +128,7 @@ return nueva_func;}
 void crear_arreglo_funcionalidades(){
   void *p = NULL ;
 
-  if ((funcionalidades =(Funcionalidad **) malloc(sizeof (Funcionalidad *) * 38)) == NULL){
+  if ((funcionalidades =(Funcionalidad **) malloc(sizeof (Funcionalidad *) * 42)) == NULL){
 	  Serial.println("funcionalidades: error en el malloc\n");
 		exit(1);
   }
@@ -135,7 +137,7 @@ void crear_arreglo_funcionalidades(){
   funcionalidades[1] = crear_nueva_funcionalidad("E3 F7 A7 12", &prueba, 0, NULL,0); //VOLVER A COMENZAR
   funcionalidades[2] = crear_nueva_funcionalidad("A3 CE 89 94", &prueba, 0, NULL,0); //COMENZAR PROGRAMA
   funcionalidades[3] = crear_nueva_funcionalidad("43 26 C4 12", &prueba, 0, NULL,0); //FINALIZAR PROGRAMA
-  funcionalidades[4] = crear_nueva_funcionalidad("A3 3E 72 94", &prueba, 0, NULL,0); //BORRAR
+  funcionalidades[4] = crear_nueva_funcionalidad("A3 3E 72 94", &prueba, 0, NULL,0); //BORRAR INSTRUCCION
   funcionalidades[5] = crear_nueva_funcionalidad("E3 FC B3 12", &prueba, 0, NULL,0); //EJECUTAR PROGRAMA
   funcionalidades[6] = crear_nueva_funcionalidad("93 02 86 94", &prueba, 0, NULL,0); //PAUSAR
   funcionalidades[7] = crear_nueva_funcionalidad("13 7C 72 94", &prueba, 0, NULL,0); //INSTRUCCIONES POR COMANDO DE VOZ (CORREGIR UID)
@@ -167,8 +169,12 @@ void crear_arreglo_funcionalidades(){
   funcionalidades[33] = crear_nueva_funcionalidad("83 75 A9 94", &prueba, 1, NULL, 5000); //ROSA
   funcionalidades[34] = crear_nueva_funcionalidad("A3 D2 B7 12", &prueba, 2, NULL, 0); //SIGUIENTE BLOQUE
   funcionalidades[35] = crear_nueva_funcionalidad("E3 00 69 12", &prueba, 2, NULL, 0); //ANTERIOR BLOQUE
-  funcionalidades[36] = crear_nueva_funcionalidad("D3 60 39 A7", &prueba, 2, NULL, 0); //SELECCIONAR COLUMNA
-  funcionalidades[37] = crear_nueva_funcionalidad("43 FB 27 A7", &prueba, 2, NULL, 0); //SELECCIONAR FILA
+  funcionalidades[36] = crear_nueva_funcionalidad("43 FB 27 A7", &prueba, 2, NULL, 0); //SELECCIONAR COLUMNA 0
+  funcionalidades[37] = crear_nueva_funcionalidad("D3 60 39 A7", &prueba, 2, NULL, 0); //SELECCIONAR COLUMNA 1
+  funcionalidades[38] = crear_nueva_funcionalidad("33 23 98 A7", &prueba, 2, NULL, 0); //SELECCIONAR COLUMNA 2
+  funcionalidades[39] = crear_nueva_funcionalidad("53 3F 92 A7", &prueba, 2, NULL, 0); //SELECCIONAR COLUMNA 3
+  funcionalidades[40] = crear_nueva_funcionalidad("E3 16 67 A7", &prueba, 2, NULL, 0); //SELECCIONAR COLUMNA 4
+  funcionalidades[41] = crear_nueva_funcionalidad("E3 DC 14 A7", &prueba, 0, NULL, 0); //BORRAR BLOQUE INSTRUCCIONES
 }
 /*-------------------------------------------------------------------------------------*/
 
@@ -228,15 +234,145 @@ void imprimir_matriz(){
 }
 /*------------------------------------------------------------------------------------*/
 
+int eliminar_bloque_instrucciones(int bloque){
+  int ***memoria_auxiliar = NULL;
 
+  if(verificar_bloque_instrucciones_vacio(bloque)){
+    Serial.println("ESTE BLOQUE ESTA VACIO");
+    return 0;
+  }
+
+  if (( memoria_auxiliar = (int ***) malloc(5 * sizeof (int **))) == NULL){ //SE CREAN LAS COLUMNAS DE CADA TIPO DE INSTRUCCION
+		Serial.println("nuevaFunc: error en el malloc\n");
+		exit(1);
+  }
+ 
+  for(int colum = 0; colum<5; colum++){  
+    memoria_auxiliar[colum] = (int **) malloc(sizeof(int *) * 6); //SE CREAN LAS FILAS DE CADA COLUMNA DE INSTRUCCIONES
+  }
+
+  for(int colum = 0; colum < 5; colum++){
+    for(int filas = 0 ; filas <6; filas++) //SE CREAN LOS BLOQUES DE INSTRUCCIONES
+    {
+      memoria_auxiliar[colum][filas] = (int *) malloc(sizeof(int) * 5); 
+    }
+  }
+
+  for( int dim = 0 ; dim < 5 ; dim++){
+    for(int filas = 0 ; filas < 6 ; filas++){
+      for( int colum = 0 ; colum < 5 ; colum++){
+        memoria_auxiliar[dim][filas][colum] = 0;
+      }   
+    }  
+  }
+
+  for( int dim = 0, dim_aux = 0 ; dim<5 ; dim++){
+    if(dim != bloque){
+      for(int colum = 0 ; colum<5 ; colum++){
+        for( int filas = 0 ; filas<6 ; filas++){ 
+          memoria_auxiliar[dim][filas][colum] = memoria_instrucciones[dim_aux][filas][colum];
+        }
+      }
+      dim_aux++;
+    }
+  }
+
+  for( int dim = 0 ; dim<5 ; dim++){
+    for(int colum = 0 ; colum<5 ; colum++){
+      for( int filas = 0 ; filas<6 ; filas++){ 
+        memoria_instrucciones[dim][filas][colum] = memoria_auxiliar[dim][filas][colum];
+      }
+    } 
+  }
+  
+  Serial.println("LIBERANDO MEMORIA");
+
+  for(int colum = 0; colum < 5; colum++){
+    for(int filas = 0 ; filas <6; filas++) //SE CREAN LOS BLOQUES DE INSTRUCCIONES
+    {
+      free(memoria_auxiliar[colum][filas]);
+    }
+  }
+
+  for(int colum = 0; colum<5; colum++){  
+    free(memoria_auxiliar[colum]); //SE CREAN LAS FILAS DE CADA COLUMNA DE INSTRUCCIONES
+  }  
+
+  free(memoria_auxiliar);
+
+  Serial.println("FIN DE LIBERACION MEMORIA");
+
+  Serial.println("/*----IMPRIMIENDO MATRIZ-----*/");
+  imprimir_matriz();
+  Serial.println("/*----FIN IMPRIMIR MATRIZ-----*/");
+}
+
+int verificar_instruccion_seleccionada(char *UID, char *UID_aux, int *selec_col, int colum, bool *cursor){
+
+  if((strcmp(UID,UID_aux) == 0)){
+    *cursor = true;
+    Serial.println("ENTRA A VERIFICAR COLUMNA");
+    if(memoria_instrucciones[sincronizacion][0][colum] == 0){
+       Serial.println("VACIOO 1");
+      imprimir_pantalla_matriz_funcionalidades(sincronizacion);
+      return 1;
+    }
+    (*selec_col)++;
+
+    if(memoria_instrucciones[sincronizacion][*selec_col][colum] != 0){
+      Serial.println("NO ESTA VACIA ESTA FILA");
+      imprimir_pantalla_matriz_funcionalidades(sincronizacion);
+      imprimir_funcion_columna_matriz_funcionalidades(sincronizacion, colum , *selec_col, true); //SELECCIONA EL ELEMENTO INDICADO
+      return 1;
+    }else{
+      Serial.print("ESTA VACIA LA FILA");
+      *selec_col = -1;
+      imprimir_pantalla_matriz_funcionalidades(sincronizacion);
+      return 1;
+    }
+  }
+return 0;}
+
+
+void eliminar_instruccion(int colum, int fila, int bloque){
+  int *columna_auxiliar = NULL;
+
+  columna_auxiliar = (int) malloc(sizeof(int) * 6);
+
+  for(int i = 0; i < 6; i++){
+    columna_auxiliar[i] = 0;
+  }
+  
+  for(int i = 0, j = 0; i < 6; i++){
+    if(i != fila){
+      columna_auxiliar[j] = memoria_instrucciones[bloque][i][colum];
+      j++;
+    }
+  }
+
+  for(int i = 0; i < 6; i++){
+    Serial.print(columna_auxiliar[i]);
+    Serial.print(" ");
+  }
+  Serial.println();
+
+  for(int i = 0; i < 6; i++){
+    memoria_instrucciones[bloque][i][colum] = columna_auxiliar[i];
+  }
+
+  free(columna_auxiliar);
+
+  Serial.println("ELIMINADA INSTRUCCION");
+}
 /*------------ALMACENA UNA INSTRUCCION EN LA MEMORIA DE INSTRUCCIONES DADO SU UID--------*/
-int almacenar_instruccion(char *UID, int *colum_selec, int *fila_selec){
+int almacenar_instruccion(char *UID,  int *selec_col_0, int *selec_col_1, int *selec_col_2, int *selec_col_3, int *selec_col_4){
   char  *UID_aux = NULL;
   int tipo_inst = -1;
+  bool cursor = false;
    //Serial.print("-------UID-----");
   //Serial.println(UID);
 
-  for(int i = 0; i <= 38 ; i++){ //REVISA TODAS LAS FUNCIONALIDADES
+  for(int i = 0; i <= 41 ; i++){ //REVISA TODAS LAS FUNCIONALIDADES
     UID_aux = NULL;
     UID_aux = funcionalidades[i]->UID;
 
@@ -265,84 +401,38 @@ int almacenar_instruccion(char *UID, int *colum_selec, int *fila_selec){
       if((strcmp(UID,"23 DE 6C 94") == 0)){ //SI SE HA ESCANEADO TAG ENCENDER LUCES
         luces++;
       }
-      //43 FB 27 A7 FILA
-      //D3 60 39 A7 COLMNA
-      if(strcmp(UID,"D3 60 39 A7") == 0){ //SI ESCANEASTE LA TARJETA CURSOR COLUMNA
-        bool colum_vacia = true;
-        Serial.println("ENTRO EN CURSOR COLUMNA");
-        (*colum_selec)++; //POSICIONALO AL SIGUIENTE
-        Serial.print("C: ");
-        Serial.print(*colum_selec);
-        Serial.print(" F:");
-        Serial.println(*fila_selec);
 
-        if((*fila_selec) != 0){
-          Serial.println("La fila no es la primera");
-          *fila_selec = 0;
-        }
-        
-        for(int col_aux = *colum_selec ; col_aux < 5; col_aux++){
-          if( memoria_instrucciones[sincronizacion][0][col_aux] != 0 ){
-            *colum_selec = col_aux;
-            Serial.print("ENCONTRO UNA COLUMNA NO VACIA COLUM: ");
-            Serial.println(col_aux);
-            colum_vacia = false;
-            break;
-          }
-          *colum_selec = -1;
-        }
-
-        if(colum_vacia){
-           Serial.println("REINICIA COLUMNA");
-          *fila_selec = -1;
-          *colum_selec = 0;
-        }
+      if(verificar_instruccion_seleccionada(UID, "43 FB 27 A7", selec_col_0, 0, &cursor) == 1){
+        *selec_col_1 = -1;
+        *selec_col_2 = -1;
+        *selec_col_3 = -1;
+        *selec_col_4 = -1;
+      }
+      if(verificar_instruccion_seleccionada(UID, "D3 60 39 A7", selec_col_1, 1, &cursor) == 1){
+        *selec_col_0 = -1;
+        *selec_col_2 = -1;
+        *selec_col_3 = -1;
+        *selec_col_4 = -1;
+      }
       
-        if((*colum_selec) < 5){
-           Serial.println("CURSOR MENOR QUE 5");
-           imprimir_pantalla_matriz_funcionalidades(sincronizacion);
-          imprimir_funcion_columna_matriz_funcionalidades(sincronizacion, *colum_selec, *fila_selec, true);
-          
-          if(colum_vacia){
-            *colum_selec = -1;
-          }
-        }else{
-          Serial.println("CURSOR COLUMNA mayor que 5");
-          *colum_selec = 0;
-          imprimir_pantalla_matriz_funcionalidades(sincronizacion);
-          imprimir_funcion_columna_matriz_funcionalidades(sincronizacion, *colum_selec, -1, true);
-          *colum_selec = -1;
-        }
-        return 1; 
+      if(verificar_instruccion_seleccionada(UID, "33 23 98 A7", selec_col_2, 2, &cursor) == 1){
+        *selec_col_0 = -1;
+        *selec_col_1 = -1;
+        *selec_col_3 = -1;
+        *selec_col_4 = -1;
       }
 
-      if(strcmp(UID,"43 FB 27 A7") == 0){ //SI ESCANEASTE LA TARJETA CURSOR FILA
-        Serial.println("ENTRO EN CURSOR FILAA");
-        (*fila_selec)++;
-        if((*colum_selec) == -1){
-          *colum_selec = 0;
-        }
-
-        Serial.print("C: ");
-        Serial.print(*colum_selec);
-        Serial.print(" F:");
-        Serial.println(*fila_selec);
-
-        if(memoria_instrucciones[sincronizacion][*fila_selec][*colum_selec] != 0){
-          Serial.println("NO ESTA VACIA ESTA FILA");
-          imprimir_pantalla_matriz_funcionalidades(sincronizacion);
-          imprimir_funcion_columna_matriz_funcionalidades(sincronizacion, *colum_selec, *fila_selec, true); //SELECCIONA EL ELEMENTO INDICADO
-          return 1;
-        }else{
-           Serial.print("ESTA VACIA LA FILA");
-          *fila_selec = -1;
-          imprimir_pantalla_matriz_funcionalidades(sincronizacion);
-          imprimir_funcion_columna_matriz_funcionalidades(sincronizacion, *colum_selec, *fila_selec, true); //SELECCIONA EL ELEMENTO INDICADO 
-          if((*colum_selec) == 4){
-            (*colum_selec) = -1;
-          }
-          return 1;
-        }
+      if(verificar_instruccion_seleccionada(UID, "53 3F 92 A7", selec_col_3, 3, &cursor) == 1){
+        *selec_col_0 = -1;
+        *selec_col_1 = -1;
+        *selec_col_2 = -1;
+        *selec_col_4 = -1;
+      }
+      if(verificar_instruccion_seleccionada(UID, "E3 16 67 A7", selec_col_4, 4, &cursor) == 1){
+        *selec_col_0 = -1;
+        *selec_col_1 = -1;
+        *selec_col_2 = -1;
+        *selec_col_3 = -1;      
       }
 
       verificar_color_tarjeta(UID, "E3 F3 F0 94", 0 , &tipo_inst);
@@ -357,13 +447,45 @@ int almacenar_instruccion(char *UID, int *colum_selec, int *fila_selec){
       //si no encontraste que le indicaron un color a las luces ponte en modo semaforo
       if((strcmp(UID,"A3 D2 B7 12") == 0) && num_bloques > sincronizacion ){ //si verificaste que hay un bloque despues
         sincronizacion++;
-
       }
 
       if((strcmp(UID,"E3 00 69 12") == 0) && num_bloques > 0 ){ //si verificaste que hay un bloque antes
         sincronizacion--;
       }
-  
+
+      if((strcmp(UID,"A3 3E 72 94") == 0)){ //SI SE HA ESCANEADO BORRAR ISNTRUCCION
+
+        if(*selec_col_0 != -1){
+          eliminar_instruccion(0, *selec_col_0, sincronizacion);
+          *selec_col_0 = -1;
+        }
+
+        if(*selec_col_1 != -1){
+          eliminar_instruccion(1, *selec_col_1, sincronizacion);
+          *selec_col_1 = -1;
+        }
+
+        if(*selec_col_2 != -1){
+          eliminar_instruccion(2, *selec_col_2, sincronizacion);
+          *selec_col_2 = -1;
+        }
+        if(*selec_col_3 != -1){
+          eliminar_instruccion(3, *selec_col_3, sincronizacion);
+          *selec_col_3 = -1;
+        }
+        if(*selec_col_4 != -1){
+          eliminar_instruccion(4, *selec_col_4, sincronizacion);
+          *selec_col_4 = -1;
+        } 
+      }
+
+      if((strcmp(UID,"E3 DC 14 A7") == 0) ){
+        if(eliminar_bloque_instrucciones(sincronizacion) == 1){//si esta vacio no hagas nada
+          Serial.println("BLOQUE ELIMINADO");
+          num_bloques--;
+          sincronizacion = 0;
+        }
+      }
         switch(tipo_inst){
           case 3: {
             introducir_inst_columna_memoria(i,0,sincronizacion);
@@ -386,8 +508,11 @@ int almacenar_instruccion(char *UID, int *colum_selec, int *fila_selec){
             break;
           }
         } 
-        imprimir_pantalla_matriz_funcionalidades(sincronizacion);
-      
+
+        if(!cursor){
+          imprimir_pantalla_matriz_funcionalidades(sincronizacion);
+          
+        }
       return 1;
     } 
   }
@@ -414,15 +539,50 @@ void introducir_inst_columna_memoria(int indice_func, int colum, int dim){
 
 /*-----------------------------ESCANEA LAS TARJETAS-----------------------------------------------*/
 void escanear_instrucciones(){
-  unsigned long tiempo_ahora = 0;
-  int colum_selec = -1, fila_selec = -1;
+  unsigned long tiempo_ahora = 0, tiempo_previo_0 = 0,tiempo_previo_1 = 0, tiempo_previo_2 = 0, tiempo_previo_3 = 0;
+  int selec_col_0 = -1, selec_col_1 = -1, selec_col_2 = -1, selec_col_3 = -1, selec_col_4 = -1;
+  bool ojo_n_0 = true, ojo_n_1 = false, ojo_n_2 = false, ojo_n_3 = false;
   Serial.println("escaneando tags");
   myFiles.load(5, 0, 310, 480, "escanear_tarjeta.RAW", 1 , 0);
-
+ 
   while(!ejecutar_programa){
 
+    if((millis() - tiempo_previo_0 >= 3000) && ojo_n_0 ){
+      ojos_neutros_pos_0();
+      ojo_n_0 = false;
+      ojo_n_1 = true;
+      tiempo_previo_1 = millis();
+      Serial.println("OJOS 0");
+    }
+  
+    if((millis() - tiempo_previo_1 >= 3000) && ojo_n_1){
+      ojos_neutros_pos_1();
+      ojo_n_1 = false;
+      ojo_n_2 = true;
+      tiempo_previo_2 = millis();
+      Serial.println("OJOS 1");
+    }
+
+    if((millis() - tiempo_previo_2 >= 3000) && ojo_n_2){
+      ojos_neutros_pos_2();
+      ojo_n_2 = false;
+      ojo_n_3 = true;
+      tiempo_previo_3 = millis();
+      Serial.println("OJOS 2");
+    }
+
+    if((millis() - tiempo_previo_3 >= 3000) && ojo_n_3){
+      ojos_neutros_pos_3();
+      ojo_n_3 = false;
+      ojo_n_0 = true;
+      tiempo_previo_0 = millis();
+      Serial.println("OJOS 3");
+    }
+
+   Serial.println("Vamos a escanear las tags");
     if (nfc.tagPresent()){
       Serial.println("encontro una tag");
+      MP3.play(6);
       tiempo_ahora = millis();   //RETRASO DE 1250MS
        myFiles.load(5, 0, 310, 480, "tarjeta_escaneada.RAW", 1 , 0);
       while(millis() < tiempo_ahora + 500 );
@@ -433,8 +593,6 @@ void escanear_instrucciones(){
       ptrUID = new char[TagUID.length() + 1];
       strcpy(ptrUID, TagUID.c_str());
       Serial.println(ptrUID);
-      //imprimir_matriz();
-
   
       if((strcmp(ptrUID,"13 7C 72 94" ) == 0) && !finalizar_programa && comenzar_programa ){ //SI SE HA ESCANEADO TAG COMANDO VOZ Y ESTA AUN NO HA SIDO ESCANEADA PERO YA SE COMENZO LA ESCRITURA DE INSTRUCCIONES FINALIZALA
         myFiles.load(5, 0, 310, 480, "comando_voz.RAW", 1 , 0);
@@ -457,7 +615,7 @@ void escanear_instrucciones(){
       }
 
      if(comenzar_programa && !finalizar_programa){ //SI SE HA INICIADO LA ESCRITURA DEL PROGRAMA Y NO SE HA FINALIZADO COMIENZA A ALMACENAR LAS PROXIMAS TAG ESCANEADAS EN MEMORIA
-        if (almacenar_instruccion(ptrUID, &colum_selec, &fila_selec)){
+        if (almacenar_instruccion(ptrUID, &selec_col_0, &selec_col_1, &selec_col_2, &selec_col_3, &selec_col_4)){
           //imprimir_matriz();
         }
       }
@@ -466,7 +624,11 @@ void escanear_instrucciones(){
         comenzar_programa = false;
         finalizar_programa = false;
       }
+
+      imprimir_matriz();
+
       tiempo_ahora = millis();   //RETRASO DE 200MS
+    
       while(millis() < tiempo_ahora + 200 );    
     }
   }
@@ -1503,6 +1665,118 @@ void agregar_color_luces_memoria(int pos_color){ //registra la posicion de memor
 }
 /*-------------------------------------------------------------------------------------------------------------------------------------*/
 
+void displayEmotion(byte left[8], byte right[8]) {
+  lc.clearDisplay(addrL);
+  lc.clearDisplay(addrR);
+  for(int row=0;row<8;row++) {
+    lc.setRow(addrL,row,left[row]);
+    lc.setRow(addrR,row,right[row]);
+  }
+}
+
+
+void inicializar_ojos(){
+  unsigned long tiempo_actual = 0; 
+  lc.shutdown(addrL,false);
+  lc.shutdown(addrR,false);
+  /* Set the brightness to max values */
+  lc.setIntensity(addrL,15);
+  lc.setIntensity(addrR,15);
+  /* and clear the display */
+  lc.clearDisplay(addrL);
+  lc.clearDisplay(addrR);
+
+  // turn on all LEDs for a test
+  /*for(int row = 0; row<8 ;row++) {
+    lc.setRow(addrL, row, 255);
+    lc.setRow(addrR, row, 255);
+    while(millis() - tiempo_actual < 100);
+  }*/
+
+}
+
+void ojos_neutros_pos_0(){
+  unsigned long tiempo_actual = 0;
+  byte left_u[8] = {
+  0b00000000,
+  0b01111010,
+  0b11100101,
+  0b11100101,
+  0b11111101,
+  0b11111101,
+  0b01111010,
+  0b00000000
+};
+
+  displayEmotion(left_u, left_u);
+}
+
+void ojos_neutros_pos_1(){
+  unsigned long tiempo_actual = 0;
+ 
+  byte right_u[8] = {
+  0b00000000,
+  0b01111010,
+  0b11111101,
+  0b11111101,
+  0b11100101,
+  0b11100101,
+  0b01111010,
+  0b00000000
+};
+
+  displayEmotion(right_u, right_u);
+}
+
+void ojos_neutros_pos_2(){
+  unsigned long tiempo_actual = 0;
+
+  byte left_d[8] = {
+  0b00000000,
+  0b01111010,
+  0b10011101,
+  0b10011101,
+  0b11111101,
+  0b11111101,
+  0b01111010,
+  0b00000000
+};
+
+  displayEmotion(left_d, left_d);
+}
+
+void ojos_neutros_pos_3(){
+  unsigned long tiempo_actual = 0;
+ 
+  byte right_d[8] = {
+  0b00000000,
+  0b01111010,
+  0b11111101,
+  0b11111101,
+  0b10011101,
+  0b10011101,
+  0b01111010,
+  0b00000000
+};
+  displayEmotion(right_d, right_d);
+}
+
+void ojos_cerrados(){
+  unsigned long tiempo_actual = 0;
+
+  byte left[8] = {
+  0b00000000,
+  0b01111000,
+  0b11110000,
+  0b11110000,
+  0b11110000,
+  0b11110000,
+  0b01111000,
+  0b00000000
+};
+  displayEmotion(left, left); 
+}
+
 
 /*-----ESTABLECE EL ARREGLO DE LOS COLORES DISPONIBLES EN LA APLICACION----*/
 void inicializar_colores_led(){
@@ -1549,6 +1823,7 @@ void verificar_color_semaforo_movimiento_traslacion(int indice_func){
 }
 
 
+
 /*------SELECCIONAR COLUMNA---*/
 void seleccionar_columna(int *colum_selec){
 
@@ -1583,6 +1858,8 @@ void setup(void) {
   cola.write(90);
   cabeza.write(90);
   inicializar_pantalla_tft();
+  inicializar_ojos();
+  //ojos_neutros();
  
 }
 /*---------------------------------------------------------*/
@@ -1694,6 +1971,12 @@ void loop(void) {
         ejecutar_columna_instrucciones(&bloque,2, &fila_col_2, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_2, &tiempo_inicio_col_2, &tiempo_fin_col_2, &tiempo_exed_col_2,&tiempo_inicio_inst_col_2, &tiempo_eje_inst_2, &tiempo_eje_colum_2);
         imprimir_funcion_columna_matriz_funcionalidades(bloque, 2, fila_col_2, false);
       }
+      //VERIFICA SI LA COLUMNA 4 DE LA MATRIZ MEMORIA NO ESTA VACIA Y PROCEDE A EJECUTAR LAS INSTRUCCIONES QUE ESTA CONTENGA
+      if(memoria_instrucciones[bloque][0][3] != 0){
+        ejecutar_columna_instrucciones(&bloque,3, &fila_col_3, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_3, &tiempo_inicio_col_3, &tiempo_fin_col_3, &tiempo_exed_col_3,&tiempo_inicio_inst_col_3, &tiempo_eje_inst_3, &tiempo_eje_colum_3);
+        imprimir_funcion_columna_matriz_funcionalidades(bloque, 4, fila_col_4, false);
+      }
+      
       //VERIFICA SI LA COLUMNA 4 DE LA MATRIZ MEMORIA NO ESTA VACIA Y PROCEDE A EJECUTAR LAS INSTRUCCIONES QUE ESTA CONTENGA
       if(memoria_instrucciones[bloque][0][4] != 0){
         ejecutar_columna_instrucciones(&bloque,4, &fila_col_4, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_4, &tiempo_inicio_col_4, &tiempo_fin_col_4, &tiempo_exed_col_4,&tiempo_inicio_inst_col_4, &tiempo_eje_inst_4, &tiempo_eje_colum_4);
