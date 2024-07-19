@@ -547,44 +547,15 @@ void escanear_instrucciones(){
  
   while(!ejecutar_programa){
 
-    if((millis() - tiempo_previo_0 >= 3000) && ojo_n_0 ){
-      ojos_neutros_pos_0();
-      ojo_n_0 = false;
-      ojo_n_1 = true;
-      tiempo_previo_1 = millis();
-      Serial.println("OJOS 0");
-    }
-  
-    if((millis() - tiempo_previo_1 >= 3000) && ojo_n_1){
-      ojos_neutros_pos_1();
-      ojo_n_1 = false;
-      ojo_n_2 = true;
-      tiempo_previo_2 = millis();
-      Serial.println("OJOS 1");
-    }
-
-    if((millis() - tiempo_previo_2 >= 3000) && ojo_n_2){
-      ojos_neutros_pos_2();
-      ojo_n_2 = false;
-      ojo_n_3 = true;
-      tiempo_previo_3 = millis();
-      Serial.println("OJOS 2");
-    }
-
-    if((millis() - tiempo_previo_3 >= 3000) && ojo_n_3){
-      ojos_neutros_pos_3();
-      ojo_n_3 = false;
-      ojo_n_0 = true;
-      tiempo_previo_0 = millis();
-      Serial.println("OJOS 3");
-    }
-
+ mover_ojos_neutros(&tiempo_previo_0, &tiempo_previo_1, &tiempo_previo_2, &tiempo_previo_3, &ojo_n_0, &ojo_n_1, &ojo_n_2, &ojo_n_3);
+ // mover_ojos_neutros(&tiempo_previo_0, &tiempo_previo_1, &tiempo_previo_2, &ojo_n_0, &ojo_n_1,&ojo_n_2);
    Serial.println("Vamos a escanear las tags");
     if (nfc.tagPresent()){
       Serial.println("encontro una tag");
-      MP3.play(6);
+      //MP3.play(6);
+     // MP3.stop();
       tiempo_ahora = millis();   //RETRASO DE 1250MS
-       myFiles.load(5, 0, 310, 480, "tarjeta_escaneada.RAW", 1 , 0);
+      myFiles.load(5, 0, 310, 480, "tarjeta_escaneada.RAW", 1 , 0);
       while(millis() < tiempo_ahora + 500 );
 
       NfcTag tag = nfc.read();
@@ -1695,8 +1666,44 @@ void inicializar_ojos(){
 
 }
 
+void mover_ojos_neutros(unsigned long *tiempo_previo_0, unsigned long *tiempo_previo_1, unsigned long *tiempo_previo_2, unsigned long *tiempo_previo_3, bool *ojo_n_0, bool *ojo_n_1, bool *ojo_n_2, bool *ojo_n_3 ){
+  
+  if((millis() - *tiempo_previo_0 >= 3000) && *ojo_n_0 ){
+      ojos_neutros_pos_0();
+      *ojo_n_0 = false;
+      *ojo_n_1 = true;
+      *tiempo_previo_1 = millis();
+      Serial.println("OJOS 0");
+    }
+  
+    if((millis() - *tiempo_previo_1 >= 3000) && *ojo_n_1){
+      ojos_neutros_pos_1();
+      *ojo_n_1 = false;
+      *ojo_n_2 = true;
+      *tiempo_previo_2 = millis();
+      Serial.println("OJOS 1");
+    }
+
+    if((millis() - *tiempo_previo_2 >= 3000) && *ojo_n_2){
+      ojos_neutros_pos_2();
+      *ojo_n_2 = false;
+      *ojo_n_3 = true;
+      *tiempo_previo_3 = millis();
+      Serial.println("OJOS 2");
+    }
+
+    if((millis() - *tiempo_previo_3 >= 3000) && *ojo_n_3){
+      ojos_neutros_pos_3();
+      *ojo_n_3 = false;
+      *ojo_n_0 = true;
+      *tiempo_previo_0 = millis();
+      Serial.println("OJOS 3");
+    }
+
+}
+
 void ojos_neutros_pos_0(){
-  unsigned long tiempo_actual = 0;
+
   byte left_u[8] = {
   0b00000000,
   0b01111010,
@@ -1712,7 +1719,6 @@ void ojos_neutros_pos_0(){
 }
 
 void ojos_neutros_pos_1(){
-  unsigned long tiempo_actual = 0;
  
   byte right_u[8] = {
   0b00000000,
@@ -1728,8 +1734,7 @@ void ojos_neutros_pos_1(){
   displayEmotion(right_u, right_u);
 }
 
-void ojos_neutros_pos_2(){
-  unsigned long tiempo_actual = 0;
+void ojos_neutros_pos_3(){
 
   byte left_d[8] = {
   0b00000000,
@@ -1745,8 +1750,7 @@ void ojos_neutros_pos_2(){
   displayEmotion(left_d, left_d);
 }
 
-void ojos_neutros_pos_3(){
-  unsigned long tiempo_actual = 0;
+void ojos_neutros_pos_2(){
  
   byte right_d[8] = {
   0b00000000,
@@ -1762,7 +1766,6 @@ void ojos_neutros_pos_3(){
 }
 
 void ojos_cerrados(){
-  unsigned long tiempo_actual = 0;
 
   byte left[8] = {
   0b00000000,
@@ -1777,7 +1780,59 @@ void ojos_cerrados(){
   displayEmotion(left, left); 
 }
 
+void ojos_enamorados_pos_0(){
 
+  byte left[8] = {
+ 0b00000000,
+  0b00111010,
+  0b01111001,
+  0b11110001,
+  0b11110001,
+  0b01111001,
+  0b00111010,
+  0b00000000
+};
+
+displayEmotion(left, left);
+
+}
+
+void ojos_enamorados_pos_1(){
+
+  byte right[8] = {
+  0b00011010,
+  0b00111101,
+  0b01111101,
+  0b11111001,
+  0b11111001,
+  0b01111101,
+  0b00111101,
+  0b00011010
+};
+
+displayEmotion(right, right);
+
+}
+
+void mover_ojos_enamorados(unsigned long *tiempo_previo_0, unsigned long *tiempo_previo_1, bool *ojo_n_0, bool *ojo_n_1){
+  
+  if((millis() - *tiempo_previo_0 >= 1000) && *ojo_n_0 ){
+      ojos_enamorados_pos_0();
+      *ojo_n_0 = false;
+      *ojo_n_1 = true;
+      *tiempo_previo_1 = millis();
+      Serial.println("OJOS 0");
+    }
+  
+    if((millis() - *tiempo_previo_1 >= 1000) && *ojo_n_1){
+      ojos_enamorados_pos_1();
+      *ojo_n_1 = false;
+      *ojo_n_0 = true;
+      *tiempo_previo_0 = millis();
+      Serial.println("OJOS 1");
+    }
+
+}
 /*-----ESTABLECE EL ARREGLO DE LOS COLORES DISPONIBLES EN LA APLICACION----*/
 void inicializar_colores_led(){
   if ((colores = (Color **) malloc(sizeof (Color) * 8)) == NULL){
@@ -1797,7 +1852,231 @@ void inicializar_colores_led(){
 }
 /*------------------------------------------------------------------------*/
 
+void ojos_sorprendidos(){
+  byte left[8] = {
+  0b00000000,
+  0b01111010,
+  0b11111101,
+  0b11001101,
+  0b11001101,
+  0b11111101,
+  0b01111010,
+  0b00000000
+};
+displayEmotion(left, left);
+}
 
+void ojos_felices_pos_0(){
+  byte left[8] = {
+  0b00000000,
+  0b01111010,
+  0b00100101,
+  0b00100101,
+  0b00111101,
+  0b00111101,
+  0b01111010,
+  0b00000000
+};
+
+displayEmotion(left, left);
+}
+
+void ojos_felices_pos_1(){
+  byte right[8] = {
+  0b00000000,
+  0b01111010,
+  0b00111101,
+  0b00111101,
+  0b00100101,
+  0b00100101,
+  0b01111010,
+  0b00000000
+};
+
+  displayEmotion(right, right);
+
+}
+
+void mover_ojos_felices(unsigned long *tiempo_previo_0, unsigned long *tiempo_previo_1, bool *ojo_n_0, bool *ojo_n_1){
+  
+  if((millis() - *tiempo_previo_0 >= 1000) && *ojo_n_0 ){
+      ojos_felices_pos_0();
+      *ojo_n_0 = false;
+      *ojo_n_1 = true;
+      *tiempo_previo_1 = millis();
+      Serial.println("OJOS 0");
+    }
+  
+    if((millis() - *tiempo_previo_1 >= 1000) && *ojo_n_1){
+      ojos_felices_pos_1();
+      *ojo_n_1 = false;
+      *ojo_n_0 = true;
+      *tiempo_previo_0 = millis();
+      Serial.println("OJOS 1");
+    }
+}
+
+void ojos_tristes_pos_0(){
+  byte left[8] = {
+0b00000000,
+  0b01111001,
+  0b10010010,
+  0b10010010,
+  0b11110010,
+  0b11110010,
+  0b01111001,
+  0b00000000
+};
+
+  displayEmotion(left, left);
+ 
+}
+
+void ojos_tristes_pos_1(){
+  byte right[8] = {
+  0b00000000,
+  0b01111001,
+  0b11110010,
+  0b11110010,
+  0b10010010,
+  0b10010010,
+  0b01111001,
+  0b00000000
+};
+displayEmotion(right, right);
+
+}
+void mover_ojos_tristes(unsigned long *tiempo_previo_0, unsigned long *tiempo_previo_1, bool *ojo_n_0, bool *ojo_n_1){
+  
+  if((millis() - *tiempo_previo_0 >= 1000) && *ojo_n_0 ){
+      ojos_tristes_pos_0();
+      *ojo_n_0 = false;
+      *ojo_n_1 = true;
+      *tiempo_previo_1 = millis();
+      Serial.println("OJOS 0");
+    }
+  
+    if((millis() - *tiempo_previo_1 >= 1000) && *ojo_n_1){
+      ojos_tristes_pos_1();
+      *ojo_n_1 = false;
+      *ojo_n_0 = true;
+      *tiempo_previo_0 = millis();
+      Serial.println("OJOS 1");
+    }
+}
+
+void ojos_enojados_pos_0(){
+
+  byte left[8] = {
+  0b00000000,
+  0b01111000,
+  0b11111100,
+  0b11111101,
+  0b10011010,
+  0b10010100,
+  0b01101000,
+  0b00010000
+};
+
+byte right[8] = {
+  0b00010000,
+  0b01101000,
+  0b11110100,
+  0b11111010,
+  0b10011101,
+  0b10011100,
+  0b01111000,
+  0b00000000
+};
+
+ 
+displayEmotion(left, right);
+}
+
+void ojos_enojados_pos_1(){
+
+  byte left_l[8] = {
+  0b00000000,
+  0b01111000,
+  0b10011100,
+  0b10011101,
+  0b11111010,
+  0b11110100,
+  0b01101000,
+  0b00010000
+};
+
+byte right_l[8] = {
+  0b00010000,
+  0b01101000,
+  0b10010100,
+  0b10011010,
+  0b11111101,
+  0b11111100,
+  0b01111000,
+  0b00000000
+
+};
+
+displayEmotion(left_l, right_l);
+
+}
+
+void ojos_enojados_pos_2(){
+ 
+  byte left_u[8] = {
+ 0b00000000,
+  0b01111000,
+  0b11100100,
+  0b11100101,
+  0b11111010,
+  0b11110100,
+  0b01101000,
+  0b00010000
+};
+
+byte right_u[8] = {
+  0b00010000,
+  0b01101000,
+  0b11110100,
+  0b11111010,
+  0b11100101,
+  0b11100100,
+  0b01111000,
+  0b00000000
+};
+
+displayEmotion(left_u, right_u);
+
+}
+
+void mover_ojos_enojados(unsigned long *tiempo_previo_0, unsigned long *tiempo_previo_1,  unsigned long *tiempo_previo_2, bool *ojo_n_0, bool *ojo_n_1,bool *ojo_n_2){
+  
+  if((millis() - *tiempo_previo_0 >= 1000) && *ojo_n_0 ){
+      ojos_enojados_pos_0();
+      *ojo_n_0 = false;
+      *ojo_n_1 = true;
+      *tiempo_previo_1 = millis();
+      Serial.println("OJOS 0");
+    }
+  
+    if((millis() - *tiempo_previo_1 >= 1000) && *ojo_n_1){
+      ojos_enojados_pos_1();
+      *ojo_n_1 = false;
+      *ojo_n_2 = true;
+      *tiempo_previo_2 = millis();
+      Serial.println("OJOS 1");
+    }
+
+    if((millis() - *tiempo_previo_2 >= 1000) && *ojo_n_2){
+      ojos_enojados_pos_2();
+      *ojo_n_2 = false;
+      *ojo_n_0 = true;
+      *tiempo_previo_0 = millis();
+      Serial.println("OJOS 2");
+    }
+
+}
 /*--------CREA UN NUEVO COLOR DADO SUS VALORES EN RGB------*/
 void crear_nuevo_color(int pos, uint8_t R, uint8_t G, uint8_t B ){
 
