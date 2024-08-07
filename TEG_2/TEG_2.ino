@@ -128,7 +128,7 @@ return nueva_func;}
 void crear_arreglo_funcionalidades(){
   void *p = NULL ;
 
-  if ((funcionalidades =(Funcionalidad **) malloc(sizeof (Funcionalidad *) * 42)) == NULL){
+  if ((funcionalidades =(Funcionalidad **) malloc(sizeof (Funcionalidad *) * 46)) == NULL){
 	  Serial.println("funcionalidades: error en el malloc\n");
 		exit(1);
   }
@@ -153,28 +153,32 @@ void crear_arreglo_funcionalidades(){
   funcionalidades[17] = crear_nueva_funcionalidad("33 09 BB 94", &prueba, 4, NULL,15000); //EVITAR OBSTACULOS
   funcionalidades[18] = crear_nueva_funcionalidad("93 E2 20 95", &volver_izquierda, 4, NULL, 2700); //VOLVER POR LA IZQUIERDA
   funcionalidades[19] = crear_nueva_funcionalidad("23 DE 6C 94", &encender_luces, 5, NULL, 5000); //ENCENDER LUCES
-  funcionalidades[20] = crear_nueva_funcionalidad("F3 A9 89 94", &prueba, 6, NULL, 2000); //ABRIR OJOS
-  funcionalidades[21] = crear_nueva_funcionalidad("93 D3 80 94", &prueba, 6, NULL, 2000); //CERRAR OJOS
-  funcionalidades[22] = crear_nueva_funcionalidad("63 36 C6 94", &prueba, 6, NULL, 4000); //PESTANEAR
-  funcionalidades[23] = crear_nueva_funcionalidad("D3 12 74 94", &prueba, 7, NULL,10000); //GRABAR AUDIO
-  funcionalidades[24] = crear_nueva_funcionalidad("53 2D 89 94", &prueba,7, NULL,10000); //REPRODUCIR GRABACION
-  funcionalidades[25] = crear_nueva_funcionalidad("A3 7A CB 94", &emitir_sonido,7, NULL,10000); //EMITIR SONIDO
-  funcionalidades[26] = crear_nueva_funcionalidad("E3 F3 F0 94", &prueba, 1, NULL, 5000); //BLANCO
-  funcionalidades[27] = crear_nueva_funcionalidad("73 4B AA 94", &prueba, 1, NULL, 5000); //NARANJA
-  funcionalidades[28] = crear_nueva_funcionalidad("83 9D 6D 94", &prueba, 1, NULL, 5000); //AMARILLO
-  funcionalidades[29] = crear_nueva_funcionalidad("E3 D3 6B 12", &prueba, 1, NULL, 5000); //ROJO
-  funcionalidades[30] = crear_nueva_funcionalidad("B3 05 6E 12", &prueba, 1, NULL, 5000); //AZUL
-  funcionalidades[31] = crear_nueva_funcionalidad("F3 43 C6 12", &prueba, 1, NULL, 5000); //MORADO
-  funcionalidades[32] = crear_nueva_funcionalidad("93 F1 C7 12", &prueba, 1, NULL, 5000); //VERDE
-  funcionalidades[33] = crear_nueva_funcionalidad("83 75 A9 94", &prueba, 1, NULL, 5000); //ROSA
-  funcionalidades[34] = crear_nueva_funcionalidad("A3 D2 B7 12", &prueba, 2, NULL, 0); //SIGUIENTE BLOQUE
-  funcionalidades[35] = crear_nueva_funcionalidad("E3 00 69 12", &prueba, 2, NULL, 0); //ANTERIOR BLOQUE
-  funcionalidades[36] = crear_nueva_funcionalidad("43 FB 27 A7", &prueba, 2, NULL, 0); //SELECCIONAR COLUMNA 0
-  funcionalidades[37] = crear_nueva_funcionalidad("D3 60 39 A7", &prueba, 2, NULL, 0); //SELECCIONAR COLUMNA 1
-  funcionalidades[38] = crear_nueva_funcionalidad("33 23 98 A7", &prueba, 2, NULL, 0); //SELECCIONAR COLUMNA 2
-  funcionalidades[39] = crear_nueva_funcionalidad("53 3F 92 A7", &prueba, 2, NULL, 0); //SELECCIONAR COLUMNA 3
-  funcionalidades[40] = crear_nueva_funcionalidad("E3 16 67 A7", &prueba, 2, NULL, 0); //SELECCIONAR COLUMNA 4
-  funcionalidades[41] = crear_nueva_funcionalidad("E3 DC 14 A7", &prueba, 0, NULL, 0); //BORRAR BLOQUE INSTRUCCIONES
+  funcionalidades[20] = crear_nueva_funcionalidad("93 D3 80 94", &prueba, 6, NULL, 2000); //CERRAR OJOS
+  funcionalidades[21] = crear_nueva_funcionalidad("C3 7B 0A 95", &prueba, 6, NULL, 2000); //MIRAR SORPRENDIDO
+  funcionalidades[22] = crear_nueva_funcionalidad("53 5A 84 94", &prueba, 6, NULL, 2000); //MIRAR FELIZ
+  funcionalidades[23] = crear_nueva_funcionalidad("53 CF 25 95", &prueba, 6, NULL, 2000); //MIRAR TRISTE
+  funcionalidades[24] = crear_nueva_funcionalidad("63 84 6F 94", &prueba, 6, NULL, 2000); //MIRAR ENOJADO
+  funcionalidades[25] = crear_nueva_funcionalidad("03 F2 D3 A8", &prueba, 6, NULL, 2000); //MIRAR ENAMORADO
+  funcionalidades[26] = crear_nueva_funcionalidad("63 36 C6 94", &prueba, 6, NULL, 4000); //PESTANEAR
+  funcionalidades[27] = crear_nueva_funcionalidad("D3 12 74 94", &prueba, 7, NULL,10000); //GRABAR AUDIO
+  funcionalidades[28] = crear_nueva_funcionalidad("53 2D 89 94", &prueba,7, NULL,10000); //REPRODUCIR GRABACION
+  funcionalidades[29] = crear_nueva_funcionalidad("A3 7A CB 94", &emitir_sonido,7, NULL,10000); //EMITIR SONIDO
+  funcionalidades[30] = crear_nueva_funcionalidad("E3 F3 F0 94", &prueba, 1, NULL, 5000); //BLANCO
+  funcionalidades[31] = crear_nueva_funcionalidad("73 4B AA 94", &prueba, 1, NULL, 5000); //NARANJA
+  funcionalidades[32] = crear_nueva_funcionalidad("83 9D 6D 94", &prueba, 1, NULL, 5000); //AMARILLO
+  funcionalidades[33] = crear_nueva_funcionalidad("E3 D3 6B 12", &prueba, 1, NULL, 5000); //ROJO
+  funcionalidades[34] = crear_nueva_funcionalidad("B3 05 6E 12", &prueba, 1, NULL, 5000); //AZUL
+  funcionalidades[35] = crear_nueva_funcionalidad("F3 43 C6 12", &prueba, 1, NULL, 5000); //MORADO
+  funcionalidades[36] = crear_nueva_funcionalidad("93 F1 C7 12", &prueba, 1, NULL, 5000); //VERDE
+  funcionalidades[37] = crear_nueva_funcionalidad("83 75 A9 94", &prueba, 1, NULL, 5000); //ROSA
+  funcionalidades[38] = crear_nueva_funcionalidad("A3 D2 B7 12", &prueba, 2, NULL, 0); //SIGUIENTE BLOQUE
+  funcionalidades[39] = crear_nueva_funcionalidad("E3 00 69 12", &prueba, 2, NULL, 0); //ANTERIOR BLOQUE
+  funcionalidades[40] = crear_nueva_funcionalidad("43 FB 27 A7", &prueba, 2, NULL, 0); //SELECCIONAR COLUMNA 0
+  funcionalidades[41] = crear_nueva_funcionalidad("D3 60 39 A7", &prueba, 2, NULL, 0); //SELECCIONAR COLUMNA 1
+  funcionalidades[42] = crear_nueva_funcionalidad("33 23 98 A7", &prueba, 2, NULL, 0); //SELECCIONAR COLUMNA 2
+  funcionalidades[43] = crear_nueva_funcionalidad("53 3F 92 A7", &prueba, 2, NULL, 0); //SELECCIONAR COLUMNA 3
+  funcionalidades[44] = crear_nueva_funcionalidad("E3 16 67 A7", &prueba, 2, NULL, 0); //SELECCIONAR COLUMNA 4
+  funcionalidades[45] = crear_nueva_funcionalidad("E3 DC 14 A7", &prueba, 0, NULL, 0); //BORRAR BLOQUE INSTRUCCIONES
 }
 /*-------------------------------------------------------------------------------------*/
 
@@ -538,7 +542,7 @@ void introducir_inst_columna_memoria(int indice_func, int colum, int dim){
 
 
 /*-----------------------------ESCANEA LAS TARJETAS-----------------------------------------------*/
-void escanear_instrucciones(){
+void escanear_instrucciones( unsigned long *tiempos_previos_ojos, bool *turnos_ojos){
   unsigned long tiempo_ahora = 0, tiempo_previo_0 = 0,tiempo_previo_1 = 0, tiempo_previo_2 = 0, tiempo_previo_3 = 0;
   int selec_col_0 = -1, selec_col_1 = -1, selec_col_2 = -1, selec_col_3 = -1, selec_col_4 = -1;
   bool ojo_n_0 = true, ojo_n_1 = false, ojo_n_2 = false, ojo_n_3 = false;
@@ -546,8 +550,10 @@ void escanear_instrucciones(){
   myFiles.load(5, 0, 310, 480, "escanear_tarjeta.RAW", 1 , 0);
  
   while(!ejecutar_programa){
-
- mover_ojos_neutros(&tiempo_previo_0, &tiempo_previo_1, &tiempo_previo_2, &tiempo_previo_3, &ojo_n_0, &ojo_n_1, &ojo_n_2, &ojo_n_3);
+    //mover_ojos_sorprendidos();
+    mover_ojos_neutros(tiempos_previos_ojos, turnos_ojos);
+    //Serial.print("GUARDADO EN POS 1--> ");
+    //Serial.println(tiempos_previos_ojos[1]);
  // mover_ojos_neutros(&tiempo_previo_0, &tiempo_previo_1, &tiempo_previo_2, &ojo_n_0, &ojo_n_1,&ojo_n_2);
    Serial.println("Vamos a escanear las tags");
     if (nfc.tagPresent()){
@@ -744,10 +750,13 @@ return tiempo_eje_programa;
 //TIEMPO_INST : TIEMPO ESTABLECIDO PARA LA EJECUCION DE LA INSTRUCCION ACTUAL
 //TIEMPO_EJE_COL : TIEMPO ESTABLECIDO PARA LA EJECUCION DE LA COLUMNA DADA
 
-void ejecutar_columna_instrucciones(int *bloque, int columna, int *fila, unsigned long *tiempo_inicio_bloque, unsigned long *tiempo_fin_bloque, unsigned long *tiempo_eje_bloque, bool *ejecutada, unsigned long *tiempo_inicio_col,unsigned long *tiempo_fin_col, bool *tiempo_exed_col, unsigned long *tiempo_inicio_inst, unsigned long *tiempo_inst, unsigned long *tiempo_eje_col){
-  
-  void (*Funcionalidad)(bool) = NULL;
+void ejecutar_columna_instrucciones(int *bloque, int columna, int *fila, unsigned long *tiempo_inicio_bloque, unsigned long *tiempo_fin_bloque, unsigned long *tiempo_eje_bloque, bool *ejecutada, unsigned long *tiempo_inicio_col,unsigned long *tiempo_fin_col, bool *tiempo_exed_col, unsigned long *tiempo_inicio_inst, unsigned long *tiempo_inst, unsigned long *tiempo_eje_col, unsigned long *tiempos_previos_ojos, bool *turnos_ojos){
+  unsigned long tiempo_previo_0 = 0,tiempo_previo_1 = 0, tiempo_previo_2 = 0, tiempo_previo_3 = 0;
+  bool ojo_n_0 = true, ojo_n_1 = false, ojo_n_2 = false, ojo_n_3 = false;
 
+  void (*Funcionalidad)(bool) = NULL;
+  char *ptrUID = NULL;
+  
   Serial.print("COLUMNA: ");
   Serial.println(columna);
 
@@ -755,12 +764,13 @@ void ejecutar_columna_instrucciones(int *bloque, int columna, int *fila, unsigne
     if(memoria_instrucciones[*bloque][*fila][columna] != 0){ //VERIFICA SI EXISTE UNA INSTRUCCION PARA EJECUTAR
       if(!(*ejecutada) ){ //VERIFICA SI NO SE HA EJECUTADO LA INSTRUCCION
         Funcionalidad = (funcionalidades[memoria_instrucciones[*bloque][*fila][columna]])->Ptr_func;
-        Funcionalidad(false);
+        ptrUID = (funcionalidades[memoria_instrucciones[*bloque][*fila][columna]])->UID;
+        
+        if(columna != 3){
+          Funcionalidad(false);
+        }
         *ejecutada = true; 
 
-       /* if(columna == 1){
-          verificar_color_semaforo_movimiento_traslacion(memoria_instrucciones[*bloque][*fila][columna]);
-        }*/
         if((*fila) == 0){ //VERIFICA SI ES LA PRIMERA INSTRUCCION DE LA COLUMNA DADA
           *tiempo_inicio_inst = *tiempo_inicio_bloque;
         }else{
@@ -769,6 +779,36 @@ void ejecutar_columna_instrucciones(int *bloque, int columna, int *fila, unsigne
       }else{ //VERIFICA SI LA INSTRUCCION YA FUE EJECUTADA
         *tiempo_fin_col = millis();
 
+        if(columna == 3){
+          if(strcmp(ptrUID, "93 D3 80 94") == 0){
+            Serial.println("CERRAR OJOS");
+            cerrar_ojos();
+          }
+          if(strcmp(ptrUID, "C3 7B 0A 95") == 0){
+            Serial.println("MIRAR SORPRENDIDO");
+            mover_ojos_sorprendidos();
+          }
+          if(strcmp(ptrUID, "53 5A 84 94") == 0){
+            Serial.println("MIRAR FELIZ");
+            mover_ojos_felices(tiempos_previos_ojos, turnos_ojos);
+          }
+          if(strcmp(ptrUID, "53 CF 25 95") == 0){
+            Serial.println("MIRAR TRISTE");
+            mover_ojos_tristes(tiempos_previos_ojos, turnos_ojos);
+          }
+          if(strcmp(ptrUID, "63 84 6F 94") == 0){
+            Serial.println("MIRAR ENOJADO");
+            mover_ojos_enojados(tiempos_previos_ojos, turnos_ojos);
+          }
+          if(strcmp(ptrUID, "03 F2 D3 A8") == 0){
+            Serial.println("MIRAR ENAMORADO");
+            mover_ojos_enamorados(tiempos_previos_ojos, turnos_ojos);
+          }
+          if(strcmp(ptrUID, "63 36 C6 94") == 0){
+            Serial.println("PESTANEAR");
+            pestanar(tiempos_previos_ojos, turnos_ojos);
+          }
+        }
         if(!(*tiempo_exed_col)){ //VERIFICA SI AUN NO HAY TIEMPO EXCENDENTE EN ESTA COLUMNA 
           *tiempo_inst = funcionalidades[memoria_instrucciones[*bloque][*fila][columna]]->exec_time;
       
@@ -787,7 +827,11 @@ void ejecutar_columna_instrucciones(int *bloque, int columna, int *fila, unsigne
         //VERIFICA SI EL TIEMPO TRANSCURRIDO DESDE QUE COMENZO A EJECUTARSE LA INSTRUCCION ES IGUAL AL ESTABLECIDO PARA SU EJECUCION O SI EL TIEMPO ESTABLECIDO PARA LA EJECUCION DE LA COLUMNA YA SE CUMPLIO.
         if(((*tiempo_fin_col) - (*tiempo_inicio_inst)  >= *tiempo_inst) || ((*tiempo_fin_col) - (*tiempo_inicio_col)  >= (*tiempo_eje_bloque)) ){ 
           Funcionalidad = (funcionalidades[memoria_instrucciones[*bloque][*fila][columna]])->Ptr_func;
-          Funcionalidad(true); //DESACTIVA LA INSTRUCCION
+          if(columna !=3){
+            Funcionalidad(true); //DESACTIVA LA INSTRUCCION
+          }else{
+            Serial.println("OJOS NEUTROS");
+          }
           (*fila)++;// INCREMENTA LA FILA A RECORRER
           *ejecutada = false; 
           *tiempo_exed_col = false;
@@ -1666,37 +1710,72 @@ void inicializar_ojos(){
 
 }
 
-void mover_ojos_neutros(unsigned long *tiempo_previo_0, unsigned long *tiempo_previo_1, unsigned long *tiempo_previo_2, unsigned long *tiempo_previo_3, bool *ojo_n_0, bool *ojo_n_1, bool *ojo_n_2, bool *ojo_n_3 ){
+void pestanar(unsigned long *tiempo_previo, bool *turnos_ojos){
   
-  if((millis() - *tiempo_previo_0 >= 3000) && *ojo_n_0 ){
+  if((millis() - tiempo_previo[0] >= 2000) && turnos_ojos[0]){
       ojos_neutros_pos_0();
-      *ojo_n_0 = false;
-      *ojo_n_1 = true;
-      *tiempo_previo_1 = millis();
+      turnos_ojos[0] = false;
+      turnos_ojos[1] = true;
+      tiempo_previo[1] = millis();
       Serial.println("OJOS 0");
     }
   
-    if((millis() - *tiempo_previo_1 >= 3000) && *ojo_n_1){
-      ojos_neutros_pos_1();
-      *ojo_n_1 = false;
-      *ojo_n_2 = true;
-      *tiempo_previo_2 = millis();
+    if((millis() - tiempo_previo[1] >= 2000) && turnos_ojos[1]){
+      cerrar_ojos();
+      turnos_ojos[1] = false;
+      turnos_ojos[2] = true;
+      tiempo_previo[2] = millis();
       Serial.println("OJOS 1");
     }
 
-    if((millis() - *tiempo_previo_2 >= 3000) && *ojo_n_2){
-      ojos_neutros_pos_2();
-      *ojo_n_2 = false;
-      *ojo_n_3 = true;
-      *tiempo_previo_3 = millis();
+    if((millis() - tiempo_previo[2] >= 2000) && turnos_ojos[2]){
+      ojos_neutros_pos_1();
+      turnos_ojos[2] = false;
+      turnos_ojos[3] = true;
+      tiempo_previo[3] = millis();
       Serial.println("OJOS 2");
     }
 
-    if((millis() - *tiempo_previo_3 >= 3000) && *ojo_n_3){
+    if((millis() - tiempo_previo[3] >= 2000) && turnos_ojos[3]){
+      cerrar_ojos();
+      turnos_ojos[3] = false;
+      turnos_ojos[0] = true;
+      tiempo_previo[0] = millis();
+      Serial.println("OJOS 3");
+    }
+}
+
+void mover_ojos_neutros(unsigned long *tiempo_previo, bool *turnos_ojos ){
+  
+  if((millis() - tiempo_previo[0] >= 3000) && turnos_ojos[0] ){
+      ojos_neutros_pos_0();
+      turnos_ojos[0] = false;
+      turnos_ojos[1] = true;
+      tiempo_previo[1] = millis();
+      Serial.println("OJOS 0");
+    }
+  
+    if((millis() - tiempo_previo[1] >= 3000) && turnos_ojos[1]){
+      ojos_neutros_pos_1();
+      turnos_ojos[1] = false;
+      turnos_ojos[2] = true;
+      tiempo_previo[2] = millis();
+      Serial.println("OJOS 1");
+    }
+
+    if((millis() - tiempo_previo[2] >= 3000) && turnos_ojos[2]){
+      ojos_neutros_pos_2();
+      turnos_ojos[2] = false;
+      turnos_ojos[3] = true;
+      tiempo_previo[3] = millis();
+      Serial.println("OJOS 2");
+    }
+
+    if((millis() - tiempo_previo[3] >= 3000) && turnos_ojos[3]){
       ojos_neutros_pos_3();
-      *ojo_n_3 = false;
-      *ojo_n_0 = true;
-      *tiempo_previo_0 = millis();
+      turnos_ojos[3] = false;
+      turnos_ojos[0] = true;
+      tiempo_previo[0] = millis();
       Serial.println("OJOS 3");
     }
 
@@ -1765,7 +1844,7 @@ void ojos_neutros_pos_2(){
   displayEmotion(right_d, right_d);
 }
 
-void ojos_cerrados(){
+void cerrar_ojos(){
 
   byte left[8] = {
   0b00000000,
@@ -1814,21 +1893,21 @@ displayEmotion(right, right);
 
 }
 
-void mover_ojos_enamorados(unsigned long *tiempo_previo_0, unsigned long *tiempo_previo_1, bool *ojo_n_0, bool *ojo_n_1){
+void mover_ojos_enamorados(unsigned long *tiempo_previo, bool *turnos_ojos){
   
-  if((millis() - *tiempo_previo_0 >= 1000) && *ojo_n_0 ){
+  if((millis() - tiempo_previo[0] >= 1000) && turnos_ojos[0]){
       ojos_enamorados_pos_0();
-      *ojo_n_0 = false;
-      *ojo_n_1 = true;
-      *tiempo_previo_1 = millis();
+      turnos_ojos[0] = false;
+      turnos_ojos[1] = true;
+      tiempo_previo[1] = millis();
       Serial.println("OJOS 0");
     }
   
-    if((millis() - *tiempo_previo_1 >= 1000) && *ojo_n_1){
+    if((millis() - tiempo_previo[1] >= 1000) && turnos_ojos[1]){
       ojos_enamorados_pos_1();
-      *ojo_n_1 = false;
-      *ojo_n_0 = true;
-      *tiempo_previo_0 = millis();
+      turnos_ojos[1] = false;
+      turnos_ojos[0] = true;
+      tiempo_previo[0] = millis();
       Serial.println("OJOS 1");
     }
 
@@ -1852,7 +1931,7 @@ void inicializar_colores_led(){
 }
 /*------------------------------------------------------------------------*/
 
-void ojos_sorprendidos(){
+void mover_ojos_sorprendidos(){
   byte left[8] = {
   0b00000000,
   0b01111010,
@@ -1897,21 +1976,21 @@ void ojos_felices_pos_1(){
 
 }
 
-void mover_ojos_felices(unsigned long *tiempo_previo_0, unsigned long *tiempo_previo_1, bool *ojo_n_0, bool *ojo_n_1){
+void mover_ojos_felices(unsigned long *tiempo_previo, bool *turnos_ojos){
   
-  if((millis() - *tiempo_previo_0 >= 1000) && *ojo_n_0 ){
+  if((millis() - tiempo_previo[0] >= 1000) && turnos_ojos[0] ){
       ojos_felices_pos_0();
-      *ojo_n_0 = false;
-      *ojo_n_1 = true;
-      *tiempo_previo_1 = millis();
+      turnos_ojos[0] = false;
+      turnos_ojos[1] = true;
+      tiempo_previo[1] = millis();
       Serial.println("OJOS 0");
     }
   
-    if((millis() - *tiempo_previo_1 >= 1000) && *ojo_n_1){
+    if((millis() - tiempo_previo[1] >= 1000) && turnos_ojos[1]){
       ojos_felices_pos_1();
-      *ojo_n_1 = false;
-      *ojo_n_0 = true;
-      *tiempo_previo_0 = millis();
+      turnos_ojos[1] = false;
+      turnos_ojos[0] = true;
+      tiempo_previo[0] = millis();
       Serial.println("OJOS 1");
     }
 }
@@ -1946,21 +2025,21 @@ void ojos_tristes_pos_1(){
 displayEmotion(right, right);
 
 }
-void mover_ojos_tristes(unsigned long *tiempo_previo_0, unsigned long *tiempo_previo_1, bool *ojo_n_0, bool *ojo_n_1){
+void mover_ojos_tristes(unsigned long *tiempo_previo, bool *turnos_ojos){
   
-  if((millis() - *tiempo_previo_0 >= 1000) && *ojo_n_0 ){
+  if((millis() - tiempo_previo[0] >= 1000) && turnos_ojos[0] ){
       ojos_tristes_pos_0();
-      *ojo_n_0 = false;
-      *ojo_n_1 = true;
-      *tiempo_previo_1 = millis();
+      turnos_ojos[0] = false;
+      turnos_ojos[1] = true;
+      tiempo_previo[1] = millis();
       Serial.println("OJOS 0");
     }
   
-    if((millis() - *tiempo_previo_1 >= 1000) && *ojo_n_1){
+    if((millis() - tiempo_previo[1] >= 1000) && turnos_ojos[1]){
       ojos_tristes_pos_1();
-      *ojo_n_1 = false;
-      *ojo_n_0 = true;
-      *tiempo_previo_0 = millis();
+      turnos_ojos[1] = false;
+      turnos_ojos[0] = true;
+      tiempo_previo[0] = millis();
       Serial.println("OJOS 1");
     }
 }
@@ -2050,29 +2129,29 @@ displayEmotion(left_u, right_u);
 
 }
 
-void mover_ojos_enojados(unsigned long *tiempo_previo_0, unsigned long *tiempo_previo_1,  unsigned long *tiempo_previo_2, bool *ojo_n_0, bool *ojo_n_1,bool *ojo_n_2){
+void mover_ojos_enojados(unsigned long *tiempo_previo, bool *turnos_ojos){
   
-  if((millis() - *tiempo_previo_0 >= 1000) && *ojo_n_0 ){
+  if((millis() - tiempo_previo[0] >= 1000) && turnos_ojos[0] ){
       ojos_enojados_pos_0();
-      *ojo_n_0 = false;
-      *ojo_n_1 = true;
-      *tiempo_previo_1 = millis();
+      turnos_ojos[0] = false;
+      turnos_ojos[1] = true;
+      tiempo_previo[1] = millis();
       Serial.println("OJOS 0");
     }
   
-    if((millis() - *tiempo_previo_1 >= 1000) && *ojo_n_1){
+    if((millis() - tiempo_previo[1] >= 1000) && turnos_ojos[1]){
       ojos_enojados_pos_1();
-      *ojo_n_1 = false;
-      *ojo_n_2 = true;
-      *tiempo_previo_2 = millis();
+      turnos_ojos[1] = false;
+      turnos_ojos[2] = true;
+      tiempo_previo[2] = millis();
       Serial.println("OJOS 1");
     }
 
-    if((millis() - *tiempo_previo_2 >= 1000) && *ojo_n_2){
+    if((millis() - tiempo_previo[2] >= 1000) && turnos_ojos[2]){
       ojos_enojados_pos_2();
-      *ojo_n_2 = false;
-      *ojo_n_0 = true;
-      *tiempo_previo_0 = millis();
+      turnos_ojos[2] = false;
+      turnos_ojos[0] = true;
+      tiempo_previo[0] = millis();
       Serial.println("OJOS 2");
     }
 
@@ -2143,6 +2222,41 @@ void setup(void) {
 }
 /*---------------------------------------------------------*/
 
+unsigned long *crear_arreglo_tiempos_ojos(){
+  unsigned long *tiempos_previos_ojos = NULL;
+
+  if ((tiempos_previos_ojos = (unsigned long *) malloc(sizeof (unsigned long) * 6)) == NULL){
+		Serial.println("nuevaFunc: error en el malloc\n");
+		exit(1);
+  }
+
+return tiempos_previos_ojos;}
+
+void inicializar_tiempos_ojos(unsigned long *tiempos_previos_ojos){
+  
+  for(int i = 0; i< 6 ; i++){
+    tiempos_previos_ojos[i] = 0;
+  }
+
+}
+
+bool *crear_arreglo_turnos_ojos(){
+  bool *turnos_ojos = NULL;
+  if ((turnos_ojos = (bool *) malloc(sizeof (bool) * 6)) == NULL){
+		Serial.println("nuevaFunc: error en el malloc\n");
+		exit(1);
+  }
+
+return turnos_ojos;}
+
+void inicializar_turnos_ojos(bool *turnos_ojos){
+  turnos_ojos[0] = true;
+
+  for(int i = 1; i< 6 ; i++){
+    turnos_ojos[i] = false;
+  }
+}
+
 
 /**-------------------------------------------------------------------------------------PROGRAMA PRINCIPAL---------------------------------------------------------------------------------------------------*/
 void loop(void) {
@@ -2167,7 +2281,24 @@ void loop(void) {
 
   int fila_col_0 = 0, fila_col_1 = 0, fila_col_2 = 0, fila_col_3 = 0, fila_col_4 = 0; //INDICA LA FILA DE LA MATRIZ DE MEMORIA QUE ACTUALMENTE DE SE EJECUTA. INCREMENTA LUEGO DE FINALIZADA UNA INSTRUCCION
 
-  escanear_instrucciones();
+  unsigned long *tiempos_previos_ojos;
+
+  bool *turnos_ojos;
+
+  tiempos_previos_ojos = crear_arreglo_tiempos_ojos();
+  inicializar_tiempos_ojos(tiempos_previos_ojos);
+  Serial.println("INICIO");
+  for(int i = 0; i<6; i++){
+    Serial.println(tiempos_previos_ojos[i]);
+  }
+    
+  
+  Serial.println("FIN");
+  turnos_ojos = crear_arreglo_turnos_ojos();
+  inicializar_turnos_ojos(turnos_ojos);
+  
+  escanear_instrucciones(tiempos_previos_ojos, turnos_ojos);
+
 
   if(tiempos_eje_bloques == NULL){ //SI AUN NO HAZ CREADO EL ARREGLO DE BLOQUE
     tiempos_eje_bloques = crear_arreglo_tiempos_ejecucion_bloques();
@@ -2178,6 +2309,7 @@ void loop(void) {
   establecer_tiempos_eje_arreglo_tiempos_bloques(tiempo_duracion_bloque_instrucciones(0),tiempo_duracion_bloque_instrucciones(1),tiempo_duracion_bloque_instrucciones(2),tiempo_duracion_bloque_instrucciones(3),tiempo_duracion_bloque_instrucciones(4));
   
   tiempo_eje_programa = determinar_duracion_programa();
+
   Serial.print("*********************TIEMPO EJECUCION PROGRAMA********************");
   Serial.println(tiempo_eje_programa);
   Serial.println();
@@ -2235,30 +2367,30 @@ void loop(void) {
         tiempo_eje_bloque = tiempos_eje_bloques[4];
       }
       //--------------------------------------------
-      //VERIFICA SI LA COLUMNA 0 DE LA MATRIZ MEMORIA NO ESTA VACIA Y PROCEDE A EJECUTAR LAS INSTRUCCIONES QUE ESTA CONTENGA
+      //VERIFICA SI LA COLUMNA 0 DE LA MATRIZ MEMORIA NO ESTA VACIA Y PROCEDE A EJECUTAR LAS INSTRUCCIONES QUE ESTA CONTENGA //MOV EXTREMIDADES
       if(memoria_instrucciones[bloque][0][0] != 0){ 
-        ejecutar_columna_instrucciones(&bloque,0, &fila_col_0, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_0, &tiempo_inicio_col_0, &tiempo_fin_col_0, &tiempo_exed_col_0, &tiempo_inicio_inst_col_0, &tiempo_eje_inst_0, &tiempo_eje_colum_0);
+        ejecutar_columna_instrucciones(&bloque,0, &fila_col_0, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_0, &tiempo_inicio_col_0, &tiempo_fin_col_0, &tiempo_exed_col_0, &tiempo_inicio_inst_col_0, &tiempo_eje_inst_0, &tiempo_eje_colum_0,tiempos_previos_ojos, turnos_ojos);
         imprimir_funcion_columna_matriz_funcionalidades(bloque, 0, fila_col_0, false);
       }   
-      //VERIFICA SI LA COLUMNA 1 DE LA MATRIZ MEMORIA NO ESTA VACIA Y PROCEDE A EJECUTAR LAS INSTRUCCIONES QUE ESTA CONTENGA
+      //VERIFICA SI LA COLUMNA 1 DE LA MATRIZ MEMORIA NO ESTA VACIA Y PROCEDE A EJECUTAR LAS INSTRUCCIONES QUE ESTA CONTENGA //MOV CUERPO
       if(memoria_instrucciones[bloque][0][1] != 0){
-        ejecutar_columna_instrucciones(&bloque,1, &fila_col_1, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_1, &tiempo_inicio_col_1, &tiempo_fin_col_1, &tiempo_exed_col_1,&tiempo_inicio_inst_col_1, &tiempo_eje_inst_1, &tiempo_eje_colum_1);
+        ejecutar_columna_instrucciones(&bloque,1, &fila_col_1, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_1, &tiempo_inicio_col_1, &tiempo_fin_col_1, &tiempo_exed_col_1,&tiempo_inicio_inst_col_1, &tiempo_eje_inst_1, &tiempo_eje_colum_1,tiempos_previos_ojos, turnos_ojos);
         imprimir_funcion_columna_matriz_funcionalidades(bloque, 1, fila_col_1, false);
       }
-      //VERIFICA SI LA COLUMNA 2 DE LA MATRIZ MEMORIA NO ESTA VACIA Y PROCEDE A EJECUTAR LAS INSTRUCCIONES QUE ESTA CONTENGA
+      //VERIFICA SI LA COLUMNA 2 DE LA MATRIZ MEMORIA NO ESTA VACIA Y PROCEDE A EJECUTAR LAS INSTRUCCIONES QUE ESTA CONTENGA //LUCES LEDS
       if(memoria_instrucciones[bloque][0][2] != 0){
-        ejecutar_columna_instrucciones(&bloque,2, &fila_col_2, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_2, &tiempo_inicio_col_2, &tiempo_fin_col_2, &tiempo_exed_col_2,&tiempo_inicio_inst_col_2, &tiempo_eje_inst_2, &tiempo_eje_colum_2);
+        ejecutar_columna_instrucciones(&bloque,2, &fila_col_2, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_2, &tiempo_inicio_col_2, &tiempo_fin_col_2, &tiempo_exed_col_2,&tiempo_inicio_inst_col_2, &tiempo_eje_inst_2, &tiempo_eje_colum_2,tiempos_previos_ojos, turnos_ojos);
         imprimir_funcion_columna_matriz_funcionalidades(bloque, 2, fila_col_2, false);
       }
-      //VERIFICA SI LA COLUMNA 4 DE LA MATRIZ MEMORIA NO ESTA VACIA Y PROCEDE A EJECUTAR LAS INSTRUCCIONES QUE ESTA CONTENGA
+      //VERIFICA SI LA COLUMNA 3 DE LA MATRIZ MEMORIA NO ESTA VACIA Y PROCEDE A EJECUTAR LAS INSTRUCCIONES QUE ESTA CONTENGA //MOV OJOS
       if(memoria_instrucciones[bloque][0][3] != 0){
-        ejecutar_columna_instrucciones(&bloque,3, &fila_col_3, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_3, &tiempo_inicio_col_3, &tiempo_fin_col_3, &tiempo_exed_col_3,&tiempo_inicio_inst_col_3, &tiempo_eje_inst_3, &tiempo_eje_colum_3);
+        ejecutar_columna_instrucciones(&bloque,3, &fila_col_3, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_3, &tiempo_inicio_col_3, &tiempo_fin_col_3, &tiempo_exed_col_3,&tiempo_inicio_inst_col_3, &tiempo_eje_inst_3, &tiempo_eje_colum_3,tiempos_previos_ojos, turnos_ojos);
         imprimir_funcion_columna_matriz_funcionalidades(bloque, 4, fila_col_4, false);
       }
       
-      //VERIFICA SI LA COLUMNA 4 DE LA MATRIZ MEMORIA NO ESTA VACIA Y PROCEDE A EJECUTAR LAS INSTRUCCIONES QUE ESTA CONTENGA
+      //VERIFICA SI LA COLUMNA 4 DE LA MATRIZ MEMORIA NO ESTA VACIA Y PROCEDE A EJECUTAR LAS INSTRUCCIONES QUE ESTA CONTENGA //SONIDO
       if(memoria_instrucciones[bloque][0][4] != 0){
-        ejecutar_columna_instrucciones(&bloque,4, &fila_col_4, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_4, &tiempo_inicio_col_4, &tiempo_fin_col_4, &tiempo_exed_col_4,&tiempo_inicio_inst_col_4, &tiempo_eje_inst_4, &tiempo_eje_colum_4);
+        ejecutar_columna_instrucciones(&bloque,4, &fila_col_4, &tiempo_inicio_bloque, &tiempo_fin_bloque, &tiempo_eje_bloque, &ejecutada_4, &tiempo_inicio_col_4, &tiempo_fin_col_4, &tiempo_exed_col_4,&tiempo_inicio_inst_col_4, &tiempo_eje_inst_4, &tiempo_eje_colum_4,tiempos_previos_ojos, turnos_ojos);
         imprimir_funcion_columna_matriz_funcionalidades(bloque, 4, fila_col_4, false);
       }
       
